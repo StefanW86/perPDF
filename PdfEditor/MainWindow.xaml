@@ -1,0 +1,1022 @@
+<ui:FluentWindow x:Class="PdfEditor.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:dd="urn:gong-wpf-dragdrop"
+                 xmlns:m="clr-namespace:PdfEditor.Models"
+                 xmlns:conv="clr-namespace:PdfEditor.Converters"
+                 xmlns:local="clr-namespace:PdfEditor"
+                 Title="{Binding Titel}"
+                 Icon="pack://application:,,,/perpdf.ico"
+                 Width="1280" Height="860"
+                 MinWidth="900" MinHeight="600"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round"
+                 WindowStartupLocation="CenterScreen"
+                 AllowDrop="True"
+                 DragOver="Fenster_DragOver"
+                 Drop="Fenster_Drop">
+
+    <ui:FluentWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolZuSichtbar" />
+        <conv:InvertBoolConverter x:Key="InvertBool" />
+        <!-- Invertierter Bool-zu-Sichtbarkeit-Converter (false → Visible, true → Collapsed) -->
+        <conv:InvertBoolToVisibilityConverter x:Key="InvertBoolZuSichtbar" />
+        <!-- Konvertiert 0-basierten Seitenindex in 1-basierte Seitennummer (z. B. "S. 3") -->
+        <conv:SeitenNummerConverter x:Key="SeitenNummer" />
+
+        <!-- ===== Menüband (Ribbon) ===== -->
+        <!-- Eine Befehlsgruppe: rechter Trennstrich, etwas Innenabstand. -->
+        <Style x:Key="MenübandGruppe" TargetType="Border">
+            <Setter Property="BorderThickness" Value="0,0,1,0" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+            <Setter Property="Padding" Value="8,4" />
+        </Style>
+        <!-- Untertitel einer Gruppe (z. B. „Datei“). -->
+        <Style x:Key="MenübandGruppenTitel" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="0,5,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Style>
+        <!-- Großer Knopf: Symbol über Text, füllt die Gruppenhöhe. -->
+        <Style x:Key="MenübandKnopf" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="MinWidth" Value="58" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <!-- Speichern-Knopf: bei Änderungen in Akzentfarbe hervorgehoben. -->
+        <Style x:Key="MenübandSpeichern" TargetType="Button" BasedOn="{StaticResource MenübandKnopf}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IstGeändert}" Value="True">
+                    <Setter Property="Background" Value="#0E7C7B" />
+                    <Setter Property="BorderBrush" Value="#0B5F5E" />
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Umschalt-Knopf (Modi) im selben großen Format. -->
+        <Style x:Key="MenübandUmschalter" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="MinWidth" Value="58" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <!-- Beschriftung unter einem Knopf-Symbol. -->
+        <Style x:Key="MenübandKnopfText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="0,3,0,0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+    </ui:FluentWindow.Resources>
+
+    <ui:FluentWindow.InputBindings>
+        <KeyBinding Modifiers="Control" Key="P" Command="{Binding DruckenBefehl}" />
+    </ui:FluentWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />  <!-- Row 0: TitleBar -->
+            <RowDefinition Height="Auto" />  <!-- Row 1: Toolbar -->
+            <RowDefinition Height="Auto" />  <!-- Row 2: Tab-Leiste -->
+            <RowDefinition Height="*" />     <!-- Row 3: Inhalt -->
+            <RowDefinition Height="Auto" />  <!-- Row 4: Status -->
+        </Grid.RowDefinitions>
+
+        <!-- Titelleiste im modernen Fluent-Stil -->
+        <ui:TitleBar Grid.Row="0" Title="perPDF" />
+
+        <!-- Menüband (Ribbon): Logo links, Registerkarten rechts -->
+        <Border Grid.Row="1" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Logo: perPDF (oben links, auf Höhe der Registerreiter) -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal"
+                            Margin="12,9,12,0" VerticalAlignment="Top">
+                    <Grid Width="30" Height="30" Margin="0,0,8,0">
+                        <Border CornerRadius="7">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#15A39A" Offset="0" />
+                                    <GradientStop Color="#0E7C7B" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Rectangle Width="12" Height="2.6" RadiusX="1.3" RadiusY="1.3" Fill="#FBFAF7"
+                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,9,0,0" />
+                        <Rectangle Width="16" Height="2.6" RadiusX="1.3" RadiusY="1.3" Fill="#FBFAF7" Opacity="0.7"
+                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,14,0,0" />
+                        <Ellipse Width="7" Height="7" Fill="#F4A93B"
+                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,6" />
+                    </Grid>
+                    <TextBlock VerticalAlignment="Center" FontSize="20" FontWeight="Bold">
+                        <Run Text="per" Foreground="#1C2B2A" /><Run Text="PDF" Foreground="#0E7C7B" />
+                    </TextBlock>
+                </StackPanel>
+
+                <TabControl Grid.Column="1" BorderThickness="0" Background="Transparent"
+                            Padding="0">
+
+                    <!-- ===== Start: Datei ===== -->
+                    <TabItem Header="Start">
+                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                            <Border Style="{StaticResource MenübandGruppe}" BorderThickness="0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Datei"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Click="ÖffnenInNeuemTab_Click" ToolTip="PDF öffnen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Open28" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Öffnen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandSpeichern}"
+                                                Command="{Binding SpeichernBefehl}" ToolTip="Dokument speichern">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Save28" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Speichern" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding SpeichernUnterBefehl}" ToolTip="Unter neuem Namen speichern">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="SaveEdit24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Speichern unter" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding DruckenBefehl}" ToolTip="Dokument drucken (Strg+P)">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Print28" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Drucken" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ===== Seiten: Bearbeiten + Dokument ===== -->
+                    <TabItem Header="Seiten">
+                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                            <Border Style="{StaticResource MenübandGruppe}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Seiten"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding SeiteLöschenBefehl}" ToolTip="Ausgewählte Seite(n) löschen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Delete24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Seite löschen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding LinksDrehenBefehl}" ToolTip="Ausgewählte Seite(n) nach links drehen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="ArrowRotateCounterclockwise24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Links drehen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding RechtsDrehenBefehl}" ToolTip="Ausgewählte Seite(n) nach rechts drehen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="ArrowRotateClockwise24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Rechts drehen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <Border Style="{StaticResource MenübandGruppe}" BorderThickness="0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Dokument"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                IsEnabled="{Binding HatDokument}"
+                                                Click="ZusammenführenÖffnen_Click" ToolTip="Weitere PDFs anfügen oder zusammenführen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="DocumentAdd24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Zusammenführen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                IsEnabled="{Binding HatDokument}"
+                                                Click="SeitenExtrahierenÖffnen_Click" ToolTip="Ausgewählte Seiten als neues PDF extrahieren">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="DocumentArrowRight24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Extrahieren" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                IsEnabled="{Binding HatDokument}"
+                                                Click="SeitenEntfernenÖffnen_Click" ToolTip="Seiten per Auswahl oder Seitenbereich (z. B. 3-10) entfernen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="DocumentDismiss24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Seiten entfernen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ===== Anmerken: Einfügen, Stift, Unterschrift ===== -->
+                    <TabItem Header="Anmerken">
+                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                            <Border Style="{StaticResource MenübandGruppe}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Einfügen"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="TextEinfügenButton" Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding TextEinfügenBefehl}" ToolTip="Textfeld auf die Seite setzen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="TextAdd20" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Text einfügen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding BildEinfügenBefehl}"
+                                                ToolTip="Bild aus Datei einfügen – oder mit Strg+V direkt aus der Zwischenablage">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="ImageAdd24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Bild einfügen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <ui:DropDownButton Margin="2,0" Padding="8,6" VerticalAlignment="Stretch"
+                                                           IsEnabled="{Binding HatDokument}"
+                                                           ToolTip="Kreuz, Häkchen, Punkt, Umrandung oder Durchstreichung einfügen">
+                                            <ui:DropDownButton.Content>
+                                                <StackPanel>
+                                                    <ui:SymbolIcon Symbol="Checkmark24" FontSize="22" HorizontalAlignment="Center" />
+                                                    <TextBlock Text="Markierung" Style="{StaticResource MenübandKnopfText}" />
+                                                </StackPanel>
+                                            </ui:DropDownButton.Content>
+                                            <ui:DropDownButton.Flyout>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Kreuz" Tag="{x:Static m:SymbolArt.Kreuz}" Click="SymbolMenü_Click">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Text="✕" FontWeight="Bold" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Häkchen" Tag="{x:Static m:SymbolArt.Häkchen}" Click="SymbolMenü_Click">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Text="✓" FontWeight="Bold" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Punkt" Tag="{x:Static m:SymbolArt.Punkt}" Click="SymbolMenü_Click">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Text="●" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Umranden" Tag="{x:Static m:SymbolArt.Umranden}" Click="SymbolMenü_Click">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Text="▭" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="Durchstreichen" Tag="{x:Static m:SymbolArt.Durchstreichen}" Click="SymbolMenü_Click">
+                                                        <MenuItem.Icon>
+                                                            <TextBlock Text="—" />
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                </ContextMenu>
+                                            </ui:DropDownButton.Flyout>
+                                        </ui:DropDownButton>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <Border Style="{StaticResource MenübandGruppe}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Stift"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <ToggleButton Style="{StaticResource MenübandUmschalter}"
+                                                      IsEnabled="{Binding HatDokument}"
+                                                      IsChecked="{Binding MarkerModus, Mode=TwoWay}"
+                                                      ToolTip="Leuchtstift: mit gedrückter Maustaste über den Text ziehen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Highlight24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Textmarker" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </ToggleButton>
+                                        <ToggleButton Style="{StaticResource MenübandUmschalter}"
+                                                      IsEnabled="{Binding HatDokument}"
+                                                      IsChecked="{Binding RadiererModus, Mode=TwoWay}"
+                                                      ToolTip="Markierungsstriche durch Anklicken/Ziehen entfernen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Eraser24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Radiergummi" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <Border Style="{StaticResource MenübandGruppe}" BorderThickness="0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Unterschrift"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                        <ComboBox MinWidth="180" Margin="2,2,2,6"
+                                                  ItemsSource="{Binding Unterschriften}"
+                                                  SelectedItem="{Binding ZuEinfügendeUnterschrift, Mode=TwoWay}"
+                                                  ToolTip="Gespeicherte Unterschrift auswählen – wird sofort eingefügt">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type m:Unterschrift}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Border Background="White" Margin="0,0,6,0" Padding="1">
+                                                            <Image Source="{Binding Bild}" Height="22" Stretch="Uniform" />
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <ui:Button Content="Unterschrift importieren" Icon="{ui:SymbolIcon Signature24}"
+                                                   Margin="2,0" HorizontalAlignment="Stretch"
+                                                   Command="{Binding UnterschriftHinzufügenBefehl}" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ===== Formular ===== -->
+                    <TabItem Header="Formular">
+                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                            <Border Style="{StaticResource MenübandGruppe}" BorderThickness="0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Formularfelder"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:DropDownButton Margin="2,0" Padding="8,6" VerticalAlignment="Stretch"
+                                                           IsEnabled="{Binding HatDokument}"
+                                                           ToolTip="Ausfüllbares Formularfeld anlegen, dann auf die Seite klicken">
+                                            <ui:DropDownButton.Content>
+                                                <StackPanel>
+                                                    <ui:SymbolIcon Symbol="TextField24" FontSize="22" HorizontalAlignment="Center" />
+                                                    <TextBlock Text="Formularfeld" Style="{StaticResource MenübandKnopfText}" />
+                                                </StackPanel>
+                                            </ui:DropDownButton.Content>
+                                            <ui:DropDownButton.Flyout>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Textfeld" Tag="{x:Static m:EntwurfFeldTyp.Textfeld}" Click="FeldMenü_Click" />
+                                                    <MenuItem Header="Mehrzeiliges Textfeld" Tag="{x:Static m:EntwurfFeldTyp.MehrzeiligesTextfeld}" Click="FeldMenü_Click" />
+                                                    <MenuItem Header="Kontrollkästchen" Tag="{x:Static m:EntwurfFeldTyp.Kontrollkästchen}" Click="FeldMenü_Click" />
+                                                    <MenuItem Header="Optionsfelder (Auswahl)" Tag="{x:Static m:EntwurfFeldTyp.Optionsfeld}" Click="FeldMenü_Click" />
+                                                    <MenuItem Header="Dropdown" Tag="{x:Static m:EntwurfFeldTyp.Dropdown}" Click="FeldMenü_Click" />
+                                                    <MenuItem Header="Listenfeld" Tag="{x:Static m:EntwurfFeldTyp.Listenfeld}" Click="FeldMenü_Click" />
+                                                    <Separator />
+                                                    <MenuItem Header="Datumsfeld" Tag="{x:Static m:EntwurfFeldTyp.Datum}" Click="FeldMenü_Click" />
+                                                    <MenuItem Header="Zahlenfeld" Tag="{x:Static m:EntwurfFeldTyp.Zahl}" Click="FeldMenü_Click" />
+                                                    <MenuItem Header="Unterschriftsfeld" Tag="{x:Static m:EntwurfFeldTyp.Unterschrift}" Click="FeldMenü_Click" />
+                                                </ContextMenu>
+                                            </ui:DropDownButton.Flyout>
+                                        </ui:DropDownButton>
+                                        <ToggleButton Style="{StaticResource MenübandUmschalter}"
+                                                      IsEnabled="{Binding HatDokument}"
+                                                      IsChecked="{Binding FelderBearbeitenModus, Mode=TwoWay}"
+                                                      ToolTip="Vorhandene Formularfelder verschieben, ändern oder löschen: Feld anklicken zum Bearbeiten, ✕ zum Löschen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Edit24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Felder bearbeiten" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ===== Ansicht: Zoom, Anzeige, Info ===== -->
+                    <TabItem Header="Ansicht">
+                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                            <Border Style="{StaticResource MenübandGruppe}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Zoom"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ui:Button Icon="{ui:SymbolIcon ZoomOut24}" Margin="2,0"
+                                                   Command="{Binding ZoomMinusBefehl}" ToolTip="Verkleinern" />
+                                        <TextBlock Text="{Binding ZoomText}" VerticalAlignment="Center"
+                                                   MinWidth="48" TextAlignment="Center" />
+                                        <ui:Button Icon="{ui:SymbolIcon ZoomIn24}" Margin="2,0"
+                                                   Command="{Binding ZoomPlusBefehl}" ToolTip="Vergrößern" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <Border Style="{StaticResource MenübandGruppe}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Anzeige"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="SuchButton" Style="{StaticResource MenübandKnopf}"
+                                                IsEnabled="{Binding HatDokument}"
+                                                ToolTip="Im Dokument suchen (Strg+F)"
+                                                Click="SuchenÖffnen_Click">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Search24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Suchen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <ToggleButton Style="{StaticResource MenübandUmschalter}"
+                                                      IsEnabled="{Binding HatDokument}"
+                                                      IsChecked="{Binding KommentareSichtbar, Mode=TwoWay}"
+                                                      ToolTip="Kommentar-Seitenleiste ein-/ausblenden. Text markieren und per Rechtsklick kommentieren.">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Comment24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Kommentare" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <Border Style="{StaticResource MenübandGruppe}" BorderThickness="0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Bottom" Text="Info"
+                                               Style="{StaticResource MenübandGruppenTitel}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Click="ÜberFensterÖffnen" ToolTip="Über perPDF">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Info28" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Über" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Border>
+
+        <!-- Tab-Leiste -->
+        <Border Grid.Row="2" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                Background="{DynamicResource ApplicationBackgroundBrush}"
+                Padding="4,2,4,0">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Hidden">
+                <ItemsControl x:Name="TabLeiste">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:DokumentTab}">
+                            <Border x:Name="TabRahmen"
+                                    Margin="1,2,1,0"
+                                    Padding="10,4,4,4"
+                                    CornerRadius="4,4,0,0"
+                                    BorderThickness="1,1,1,0"
+                                    BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                    Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                    Cursor="Hand"
+                                    MouseLeftButtonDown="TabReiter_Click"
+                                    Tag="{Binding}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="TabTitelText"
+                                               Text="{Binding TabTitel}"
+                                               VerticalAlignment="Center"
+                                               MaxWidth="200"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding ViewModel.Pfad}" />
+                                    <TextBlock x:Name="GeändertZeichen"
+                                               Text="●"
+                                               Margin="5,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               Foreground="#F4A93B"
+                                               ToolTip="Ungespeicherte Änderungen"
+                                               Visibility="{Binding ViewModel.IstGeändert,
+                                                   Converter={StaticResource BoolZuSichtbar}}" />
+                                    <Button Content="✕"
+                                            Width="18" Height="18"
+                                            FontSize="9"
+                                            Padding="0"
+                                            Margin="6,0,0,0"
+                                            VerticalAlignment="Center"
+                                            ToolTip="Tab schließen"
+                                            Click="TabSchließen_Click"
+                                            Tag="{Binding}" />
+                                </StackPanel>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <!-- Geänderten Tab zusätzlich durch fetten Titel hervorheben. -->
+                                <DataTrigger Binding="{Binding ViewModel.IstGeändert}" Value="True">
+                                    <Setter TargetName="TabTitelText" Property="FontWeight" Value="SemiBold" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Schwebendes Suchfeld (Strg+F / Suchen-Schaltfläche) -->
+        <Border x:Name="SuchPanel" Grid.Row="3" Panel.ZIndex="100"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,12,28,0"
+                Visibility="Collapsed"
+                Background="{DynamicResource ApplicationBackgroundBrush}"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="8,6">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="12" Opacity="0.18" ShadowDepth="2" Direction="270" />
+            </Border.Effect>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="SuchFeld" Width="220" Margin="0,0,6,0"
+                         VerticalContentAlignment="Center"
+                         KeyDown="SuchFeld_KeyDown"
+                         TextChanged="SuchFeld_TextChanged" />
+                <TextBlock x:Name="TrefferAnzeige" VerticalAlignment="Center"
+                           MinWidth="55" Margin="0,0,4,0" TextAlignment="Center"
+                           FontSize="12"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <Button x:Name="VorigerTrefferKnopf" Content="↑" Width="26" Height="26"
+                        Padding="0" Margin="0,0,2,0" VerticalAlignment="Center"
+                        Click="VorigerTreffer_Click" />
+                <Button x:Name="NächsterTrefferKnopf" Content="↓" Width="26" Height="26"
+                        Padding="0" Margin="0,0,6,0" VerticalAlignment="Center"
+                        Click="NächsterTreffer_Click" />
+                <Button x:Name="SuchPanelSchließenKnopf" Content="✕" Width="24" Height="24"
+                        Padding="0" VerticalAlignment="Center"
+                        Click="SuchPanelSchließen_Click" />
+            </StackPanel>
+        </Border>
+
+        <!-- Hauptbereich: Miniaturen | Seitenansicht | Kommentar-Seitenleiste -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" MinWidth="170" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Linke Seitenleiste: TOC oder Seitenvorschauen -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Toggle-Leiste: nur sichtbar wenn TOC vorhanden -->
+                <Border Grid.Row="0"
+                        Visibility="{Binding HatInhaltsverzeichnis, Converter={StaticResource BoolZuSichtbar}}"
+                        BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                        BorderThickness="0,0,0,1"
+                        Padding="4,4,4,3">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Seiten"
+                                     IsChecked="{Binding ZeigeInhaltsverzeichnis, Converter={StaticResource InvertBool}, Mode=TwoWay}"
+                                     Padding="8,4" Margin="2,0" VerticalAlignment="Center" />
+                        <RadioButton Content="Inhalt"
+                                     IsChecked="{Binding ZeigeInhaltsverzeichnis, Mode=TwoWay}"
+                                     Padding="8,4" Margin="2,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Thumbnails (sichtbar wenn ZeigeInhaltsverzeichnis = false) -->
+                <!-- Umsortieren nur über den Ziehgriff (DragSourceIgnore auf der Kachel),
+                     plus erhöhte Drag-Schwelle, damit ein Klick zum Auswählen nicht
+                     versehentlich die Seitenreihenfolge ändert. -->
+                <!-- Extended-Selection: Strg/Umschalt+Klick wählt mehrere Seiten; das
+                     Kontextmenü und Entf wirken auf die gesamte Auswahl. Die Auswahl
+                     wird ins ViewModel gespiegelt (SelectionChanged), damit auch die
+                     Symbolleisten-Befehle mehrere Seiten treffen. -->
+                <ListBox x:Name="MiniaturListe" Grid.Row="1"
+                         ItemsSource="{Binding Seiten}"
+                         SelectedIndex="{Binding AktuelleSeite, Mode=TwoWay}"
+                         SelectionMode="Extended"
+                         SelectionChanged="MiniaturListe_SelectionChanged"
+                         PreviewMouseRightButtonDown="MiniaturListe_PreviewMouseRightButtonDown"
+                         KeyDown="MiniaturListe_KeyDown"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Visibility="{Binding ZeigeInhaltsverzeichnis, Converter={StaticResource InvertBoolZuSichtbar}}"
+                         dd:DragDrop.IsDragSource="True"
+                         dd:DragDrop.IsDropTarget="True"
+                         dd:DragDrop.MinimumHorizontalDragDistance="18"
+                         dd:DragDrop.MinimumVerticalDragDistance="18">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type m:SeitenElement}">
+                            <Grid x:Name="Kachel" Margin="4" Background="Transparent">
+                                <Grid.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Seite(n) löschen" InputGestureText="Entf"
+                                                  Click="MiniaturLöschen_Click" />
+                                        <Separator />
+                                        <MenuItem Header="Nach links drehen"
+                                                  Click="MiniaturLinksDrehen_Click" />
+                                        <MenuItem Header="Nach rechts drehen"
+                                                  Click="MiniaturRechtsDrehen_Click" />
+                                    </ContextMenu>
+                                </Grid.ContextMenu>
+                                <!-- Inhalt der Kachel: als Ziehquelle ignoriert, damit ein
+                                     Klick hier nur auswählt und kein Verschieben startet. -->
+                                <StackPanel HorizontalAlignment="Center"
+                                            dd:DragDrop.DragSourceIgnore="True">
+                                    <Border BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                            BorderThickness="1" Background="White" Padding="2">
+                                        <Image Source="{Binding Vorschau}" Stretch="Uniform" MaxHeight="200" />
+                                    </Border>
+                                    <TextBlock Text="{Binding Nummer}" HorizontalAlignment="Center"
+                                               Margin="0,4,0,0" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <!-- Ziehgriff: nur hier beginnt das Umsortieren. Erscheint
+                                     dezent beim Überfahren der Kachel. -->
+                                <Border x:Name="Ziehgriff"
+                                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        Margin="0,4,4,0" Padding="6,2"
+                                        CornerRadius="4" Opacity="0"
+                                        Background="#0E7C7B" Cursor="SizeAll"
+                                        ToolTip="Ziehen, um die Seitenreihenfolge zu ändern">
+                                    <TextBlock Text="⠿⠿" Foreground="White" FontSize="11"
+                                               FontWeight="Bold" />
+                                </Border>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <Trigger SourceName="Kachel" Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Ziehgriff" Property="Opacity" Value="0.95" />
+                                </Trigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- TOC-Baum (sichtbar wenn ZeigeInhaltsverzeichnis = true) -->
+                <TreeView x:Name="TocBaum" Grid.Row="1"
+                          ItemsSource="{Binding Inhaltsverzeichnis}"
+                          Visibility="{Binding ZeigeInhaltsverzeichnis, Converter={StaticResource BoolZuSichtbar}}"
+                          BorderThickness="0"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          SelectedItemChanged="TocBaum_SelectedItemChanged">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem">
+                            <Setter Property="IsExpanded" Value="{Binding IstAufgeklappt, Mode=TwoWay}" />
+                            <Setter Property="Padding" Value="2,3" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type m:InhaltsEintrag}"
+                                                  ItemsSource="{Binding Kinder}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Titel}"
+                                           TextWrapping="NoWrap"
+                                           TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding Titel}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,4,0" />
+                                <!-- SeitenIndex ist 0-basiert; Converter zeigt 1-basiert -->
+                                <TextBlock Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Text="{Binding SeitenIndex, Converter={StaticResource SeitenNummer}}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SeitenIndex}" Value="-1">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+                </TreeView>
+            </Grid>
+
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
+                          Background="Transparent" />
+
+            <!-- Große Ansicht der aktuellen Seite mit Overlay -->
+            <Border Grid.Column="2" Background="{DynamicResource ApplicationBackgroundBrush}">
+                <ScrollViewer x:Name="SeitenScroll" HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto" Padding="16">
+                    <Grid x:Name="SeitenHost" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image x:Name="SeitenBild" Stretch="Fill"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
+                        <Canvas x:Name="OverlayCanvas" Background="Transparent" />
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Kommentar-Seitenleiste -->
+            <Border Grid.Column="3" Width="320"
+                    Visibility="{Binding KommentareSichtbar, Converter={StaticResource BoolZuSichtbar}}"
+                    Background="{DynamicResource ApplicationBackgroundBrush}"
+                    BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1,0,0,0">
+                <Border.Resources>
+                    <Style x:Key="StatusKnopf" TargetType="Button">
+                        <Setter Property="Width" Value="34" />
+                        <Setter Property="Height" Value="26" />
+                        <Setter Property="Margin" Value="0,0,6,0" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="FontWeight" Value="Bold" />
+                    </Style>
+                    <Style x:Key="ErledigtKnopf" TargetType="Button" BasedOn="{StaticResource StatusKnopf}">
+                        <Setter Property="Foreground" Value="#1B8A4B" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderBrush" Value="#1B8A4B" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IstErledigt}" Value="True">
+                                <Setter Property="Background" Value="#1B8A4B" />
+                                <Setter Property="Foreground" Value="White" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style x:Key="AbgelehntKnopf" TargetType="Button" BasedOn="{StaticResource StatusKnopf}">
+                        <Setter Property="Foreground" Value="#C42B1C" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderBrush" Value="#C42B1C" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IstAbgelehnt}" Value="True">
+                                <Setter Property="Background" Value="#C42B1C" />
+                                <Setter Property="Foreground" Value="White" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Resources>
+
+                <DockPanel>
+                    <!-- Kopfzeile -->
+                    <Grid DockPanel.Dock="Top" Margin="10,8">
+                        <TextBlock Text="Kommentare" FontWeight="SemiBold" FontSize="14"
+                                   VerticalAlignment="Center" />
+                        <Button Content="✕" Width="24" Height="24" Padding="0"
+                                HorizontalAlignment="Right" Click="KommentareSchließen_Click"
+                                ToolTip="Seitenleiste schließen" />
+                    </Grid>
+
+                    <!-- Eingabefeld für neuen Kommentar -->
+                    <Border DockPanel.Dock="Top" Margin="10,0,10,8" Padding="8" CornerRadius="6"
+                            Visibility="{Binding HatEntwurf, Converter={StaticResource BoolZuSichtbar}}"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderBrush="#15A39A" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Entwurf.Kopfzeile}" FontSize="11" Margin="0,0,0,4"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBox x:Name="EntwurfText" MinHeight="56" TextWrapping="Wrap"
+                                     AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                     KeyDown="EntwurfText_KeyDown" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0">
+                                <Button Content="Abbrechen" Margin="0,0,6,0" Padding="10,3"
+                                        Click="EntwurfAbbrechen_Click" />
+                                <ui:Button Content="Speichern" Appearance="Primary" Padding="10,3"
+                                           Click="EntwurfSpeichern_Click" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Hinweis bei leerer Liste -->
+                    <TextBlock DockPanel.Dock="Top" Margin="12,4" TextWrapping="Wrap" FontSize="12"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               Text="Noch keine Kommentare. Text markieren, mit der rechten Maustaste anklicken und „Kommentar hinzufügen“ wählen.">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Kommentare.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- Liste der Kommentare -->
+                    <ListBox x:Name="KommentarListe" BorderThickness="0" Background="Transparent"
+                             ItemsSource="{Binding Kommentare}"
+                             SelectedItem="{Binding AusgewählterKommentar, Mode=TwoWay}"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.ScrollChanged="KommentarListe_ScrollChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type m:Kommentar}">
+                                <Border Margin="2" Padding="8" CornerRadius="6"
+                                        Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                        BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                        BorderThickness="1">
+                                    <StackPanel>
+                                        <Grid>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Kopfzeile}" FontWeight="SemiBold"
+                                                           FontSize="12" TextWrapping="Wrap" />
+                                                <TextBlock Text="{Binding SeitenText}" FontSize="10.5"
+                                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                            <Button Content="🗑" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                    Width="28" Height="24" Padding="0"
+                                                    Click="KommentarLöschen_Click" ToolTip="Kommentar löschen" />
+                                        </Grid>
+                                        <TextBlock Text="{Binding Inhalt}" TextWrapping="Wrap" Margin="0,6,0,8" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="✓" Style="{StaticResource ErledigtKnopf}"
+                                                    Click="Erledigt_Click" ToolTip="Als erledigt markieren" />
+                                            <Button Content="✕" Style="{StaticResource AbgelehntKnopf}"
+                                                    Click="Abgelehnt_Click" ToolTip="Als abgelehnt markieren" />
+                                        </StackPanel>
+
+                                        <!-- Antworten (auch aus anderen Programmen) -->
+                                        <ItemsControl ItemsSource="{Binding Antworten}" Margin="10,8,0,0"
+                                                      Visibility="{Binding HatAntworten, Converter={StaticResource BoolZuSichtbar}}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type m:KommentarAntwort}">
+                                                    <Border Margin="0,0,0,4" Padding="6" CornerRadius="4"
+                                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                                            BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                                            BorderThickness="1">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Kopfzeile}" FontSize="10.5"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                            <TextBlock Text="{Binding Inhalt}" TextWrapping="Wrap" FontSize="12" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <!-- Antwort verfassen -->
+                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                            <TextBox Width="200" Tag="{Binding}" VerticalContentAlignment="Center"
+                                                     KeyDown="AntwortText_KeyDown"
+                                                     ToolTip="Antwort schreiben und mit Eingabetaste senden" />
+                                            <Button Content="Antworten" Margin="6,0,0,0" Padding="8,2"
+                                                    Click="AntwortSenden_Click" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Formularfeld-Eigenschaften (Formular-Designer) -->
+            <Border Grid.Column="4" Width="300"
+                    Visibility="{Binding HatAusgewähltesFeld, Converter={StaticResource BoolZuSichtbar}}"
+                    Background="{DynamicResource ApplicationBackgroundBrush}"
+                    BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1,0,0,0">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Margin="12,10,8,6">
+                        <TextBlock Text="Feld-Eigenschaften" FontWeight="SemiBold" FontSize="14"
+                                   VerticalAlignment="Center" />
+                        <Button Content="✕" Width="26" Height="26" Padding="0" HorizontalAlignment="Right"
+                                Click="FeldAuswahlSchließen_Click" ToolTip="Auswahl aufheben" />
+                    </Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="12,4,12,12">
+                            <TextBlock Text="Feldname" Margin="0,6,0,2" />
+                            <TextBox Text="{Binding AusgewähltesFeld.FeldName, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock Text="Standardwert" Margin="0,10,0,2" />
+                            <TextBox Text="{Binding AusgewähltesFeld.Standardwert, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Vorbelegung; bei Kontrollkästchen 'ja', bei Optionsfeld die vorgewählte Option" />
+
+                            <TextBlock Text="QuickInfo (Tooltip)" Margin="0,10,0,2" />
+                            <TextBox Text="{Binding AusgewähltesFeld.QuickInfo, UpdateSourceTrigger=PropertyChanged}"
+                                     TextWrapping="Wrap" AcceptsReturn="True" MinHeight="40" />
+
+                            <CheckBox Content="Pflichtfeld" Margin="0,10,0,0"
+                                      IsChecked="{Binding AusgewähltesFeld.Pflichtfeld}" />
+                            <CheckBox Content="Schreibgeschützt" Margin="0,6,0,0"
+                                      IsChecked="{Binding AusgewähltesFeld.Schreibgeschützt}" />
+
+                            <!-- Auswahlmöglichkeiten (Dropdown/Listenfeld/Optionsfeld) -->
+                            <StackPanel Visibility="{Binding FeldHatOptionen, Converter={StaticResource BoolZuSichtbar}}">
+                                <TextBlock Text="Optionen (eine je Zeile)" Margin="0,12,0,2" />
+                                <!-- Übernahme erst beim Verlassen des Feldes (LostFocus): Bei jedem
+                                     Tastendruck würde das Parsen samt Seiten-Neuzeichnen die Eingabe
+                                     ausbremsen und Enter/Leerzeichen hakelig machen. -->
+                                <TextBox Text="{Binding FeldOptionenText}"
+                                         AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80"
+                                         VerticalScrollBarVisibility="Auto"
+                                         ToolTip="Eine Option je Zeile – wird beim Verlassen des Feldes übernommen" />
+                            </StackPanel>
+
+                            <!-- Mehrfachauswahl (nur Listenfeld) -->
+                            <CheckBox Content="Mehrfachauswahl erlauben" Margin="0,8,0,0"
+                                      Visibility="{Binding FeldIstListenfeld, Converter={StaticResource BoolZuSichtbar}}"
+                                      IsChecked="{Binding AusgewähltesFeld.MehrfachAuswahl}" />
+
+                            <!-- Textfeld-Eigenschaften -->
+                            <StackPanel Visibility="{Binding FeldIstText, Converter={StaticResource BoolZuSichtbar}}">
+                                <TextBlock Text="Maximale Zeichenanzahl" Margin="0,12,0,2" />
+                                <!-- LostFocus: Der Setter meldet den normalisierten Wert zurück und
+                                     würde die Eingabe sonst bei jedem Tastendruck überschreiben. -->
+                                <TextBox Text="{Binding FeldMaxZeichenText}"
+                                         ToolTip="Leer = unbegrenzt" />
+                                <CheckBox Content="Als Kästchen (gleichmäßige Felder)" Margin="0,8,0,0"
+                                          IsChecked="{Binding AusgewähltesFeld.AlsKästchen}"
+                                          ToolTip="Comb-Feld – benötigt eine maximale Zeichenanzahl" />
+                            </StackPanel>
+
+                            <!-- Format/Prüfung (nur einfaches Textfeld) -->
+                            <StackPanel Visibility="{Binding FeldFormatRelevant, Converter={StaticResource BoolZuSichtbar}}">
+                                <TextBlock Text="Format / Prüfung" Margin="0,12,0,2" />
+                                <ComboBox ItemsSource="{Binding FormatWerte}"
+                                          SelectedItem="{Binding AusgewähltesFeld.Format}" />
+                            </StackPanel>
+
+                            <TextBlock Text="Ausrichtung" Margin="0,12,0,2" />
+                            <ComboBox ItemsSource="{Binding AusrichtungWerte}"
+                                      SelectedItem="{Binding AusgewähltesFeld.Ausrichtung}" />
+
+                            <TextBlock Text="Schriftgröße (0 = automatisch)" Margin="0,10,0,2" />
+                            <TextBox Text="{Binding AusgewähltesFeld.Schriftgröße, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock Text="Textfarbe (#RRGGBB)" Margin="0,10,0,2" />
+                            <TextBox Text="{Binding AusgewähltesFeld.TextFarbe, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock Text="Rahmenfarbe (#RRGGBB, leer = keiner)" Margin="0,10,0,2" />
+                            <TextBox Text="{Binding AusgewähltesFeld.RahmenFarbe, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock Text="Hintergrundfarbe (#RRGGBB, leer = keiner)" Margin="0,10,0,2" />
+                            <TextBox Text="{Binding AusgewähltesFeld.HintergrundFarbe, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <Button Content="Feld löschen" Margin="0,16,0,0" HorizontalAlignment="Left"
+                                    Click="FeldLöschen_Click" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- Ebene für die Verbindungslinie zwischen Text und Kommentarkarte -->
+            <Canvas x:Name="VerbindungsEbene" Grid.Column="2" Grid.ColumnSpan="2"
+                    IsHitTestVisible="False" Panel.ZIndex="50" />
+        </Grid>
+
+        <!-- Statusleiste -->
+        <Border Grid.Row="4" Padding="12,6" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <Grid>
+                <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding SpeicherHinweis}" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" Foreground="#0E7C7B" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding SeitenStatus}" HorizontalAlignment="Right"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <!-- Lade-Overlay: erscheint während eine PDF geladen wird -->
+        <Grid x:Name="LadeOverlay" Visibility="Collapsed"
+              Grid.Row="1" Grid.RowSpan="4" Panel.ZIndex="200">
+            <Grid.Background>
+                <SolidColorBrush Color="#1C2B2A" Opacity="0.55" />
+            </Grid.Background>
+            <ui:Button Content="Über" Icon="{ui:SymbolIcon Info28}"
+                       HorizontalAlignment="Right" VerticalAlignment="Top"
+                       Margin="0,8,16,0"
+                       Panel.ZIndex="201"
+                       Click="ÜberFensterÖffnen" />
+            <Border Background="#FBFAF7" CornerRadius="12" Padding="32,24"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="280">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock x:Name="LadeText" Text="Lade Dokument..."
+                               FontSize="15" FontWeight="SemiBold"
+                               Foreground="#1C2B2A"
+                               HorizontalAlignment="Center" Margin="0,0,0,16" />
+                    <ProgressBar x:Name="LadeBalken"
+                                 IsIndeterminate="True"
+                                 Height="6" Width="220"
+                                 Foreground="#0E7C7B" />
+                    <TextBlock x:Name="LadeDetails" Text=""
+                               FontSize="12" Foreground="#666"
+                               HorizontalAlignment="Center" Margin="0,10,0,0" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

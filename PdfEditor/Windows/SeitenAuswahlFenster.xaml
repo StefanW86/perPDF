@@ -1,0 +1,95 @@
+<ui:FluentWindow x:Class="PdfEditor.Windows.SeitenAuswahlFenster"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:m="clr-namespace:PdfEditor.Models"
+                 Title="Seiten auswählen"
+                 Width="900" Height="650"
+                 MinWidth="600" MinHeight="420"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Titelleiste -->
+        <ui:TitleBar x:Name="TitelLeiste" Grid.Row="0" Title="Seiten auswählen" />
+
+        <!-- Symbolleiste: Bereichseingabe links, Aktionen rechts -->
+        <Border Grid.Row="1" Padding="12,6" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <TextBlock Text="Seiten:" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ui:TextBox x:Name="BereichFeld"
+                                Width="240"
+                                PlaceholderText="z. B. 3-10 oder 1,3,5-8"
+                                TextChanged="BereichFeld_TextChanged" />
+                    <ui:Button Content="Alle"
+                               Margin="8,0,0,0"
+                               Click="AlleAuswählen_Click"
+                               ToolTip="Alle Seiten auswählen" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <ui:Button x:Name="AktionKnopf"
+                               Content="Extrahieren"
+                               Icon="{ui:SymbolIcon Checkmark24}"
+                               Appearance="Primary"
+                               Margin="2"
+                               Click="Aktion_Click" />
+                    <ui:Button Content="Abbrechen"
+                               Icon="{ui:SymbolIcon Dismiss24}"
+                               Margin="2"
+                               Click="Abbrechen_Click" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Seitenliste mit Mehrfachauswahl -->
+        <ListBox x:Name="SeitenListe"
+                 Grid.Row="2"
+                 ItemsSource="{Binding Seiten}"
+                 HorizontalContentAlignment="Center"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 SelectionMode="Extended"
+                 SelectionChanged="SeitenListe_SelectionChanged">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type m:ZusammenführSeite}">
+                    <StackPanel Margin="6" HorizontalAlignment="Center" Width="110">
+                        <Border BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                BorderThickness="1" Background="White" Padding="2">
+                            <Image Source="{Binding Vorschau}" Stretch="Uniform"
+                                   Width="100" Height="140" />
+                        </Border>
+                        <TextBlock Text="{Binding AnzeigeNummer}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,4,0,0"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- Statuszeile -->
+        <Border Grid.Row="3" Padding="12,6" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <TextBlock x:Name="StatusText"
+                       Text="Seiten anklicken (Strg/Umschalt für Mehrfachauswahl) oder oben einen Bereich eingeben."
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Border>
+    </Grid>
+</ui:FluentWindow>

@@ -1,0 +1,289 @@
+<ui:FluentWindow x:Class="PdfEditor.Windows.ÜberFenster"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="Über perPDF"
+                 Width="560" Height="700"
+                 ResizeMode="NoResize"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Titelleiste -->
+        <ui:TitleBar Grid.Row="0" Title="Über perPDF" />
+
+        <!-- Inhalt -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="32,20,32,12">
+            <StackPanel>
+
+                <!-- Logo-Bereich -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,20">
+                    <Grid Width="52" Height="52" Margin="0,0,14,0">
+                        <Border CornerRadius="12">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#15A39A" Offset="0" />
+                                    <GradientStop Color="#0E7C7B" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Rectangle Width="20" Height="4.5" RadiusX="2.2" RadiusY="2.2" Fill="#FBFAF7"
+                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,15,0,0" />
+                        <Rectangle Width="27" Height="4.5" RadiusX="2.2" RadiusY="2.2" Fill="#FBFAF7" Opacity="0.7"
+                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,24,0,0" />
+                        <Ellipse Width="12" Height="12" Fill="#F4A93B"
+                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" />
+                    </Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock FontSize="34" FontWeight="Bold" LineHeight="36">
+                            <Run Text="per" Foreground="#1C2B2A" /><Run Text="PDF" Foreground="#0E7C7B" />
+                        </TextBlock>
+                        <TextBlock Text="personalPDF" FontSize="12" Foreground="#6B8080" Margin="2,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Version -->
+                <TextBlock x:Name="VersionText"
+                           HorizontalAlignment="Center"
+                           FontSize="15"
+                           Margin="0,0,0,6">
+                    <Run Text="Version " Foreground="#6B8080" />
+                    <Run x:Name="VersionNummer" FontWeight="SemiBold" Foreground="#0E7C7B" />
+                </TextBlock>
+
+                <!-- Copyright -->
+                <TextBlock x:Name="CopyrightHinweis"
+                           HorizontalAlignment="Center"
+                           Foreground="#6B8080"
+                           FontSize="12"
+                           Margin="0,0,0,20" />
+
+                <Separator Margin="0,0,0,20" />
+
+                <!-- Lizenzhinweis -->
+                <Border Background="#F0FAF9" BorderBrush="#B2DFDB" BorderThickness="1"
+                        CornerRadius="6" Padding="16,12" Margin="0,0,0,24">
+                    <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="20" Foreground="#1C2B2A">
+                        Diese Software ist proprietäres Eigentum des Autors.
+                        Lizenzbestimmungen werden zu einem späteren Zeitpunkt veröffentlicht.
+                    </TextBlock>
+                </Border>
+
+                <!-- Drittanbieter-Bibliotheken -->
+                <TextBlock Text="Verwendete Bibliotheken"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="#1C2B2A"
+                           Margin="0,0,0,10" />
+
+                <!-- Tabellenkopf -->
+                <Border Background="#0E7C7B" CornerRadius="4,4,0,0" Padding="10,6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="110" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Bibliothek" FontWeight="SemiBold"
+                                   Foreground="White" FontSize="12" />
+                        <TextBlock Grid.Column="1" Text="Version" FontWeight="SemiBold"
+                                   Foreground="White" FontSize="12" />
+                        <TextBlock Grid.Column="2" Text="Lizenz" FontWeight="SemiBold"
+                                   Foreground="White" FontSize="12" />
+                    </Grid>
+                </Border>
+
+                <!-- Tabellenzeilen -->
+                <ItemsControl>
+                    <ItemsControl.Items>
+                        <!-- PdfSharp -->
+                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="White" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0FAF9" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="PdfSharp" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="6.2.4" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <!-- PDFtoImage -->
+                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" Background="#F9FDFD">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#F9FDFD" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E8F5F4" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="PDFtoImage" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="5.2.1" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <!-- PdfPig -->
+                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="White" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0FAF9" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="PdfPig" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="0.1.14" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="Apache 2.0" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <!-- WPF-UI -->
+                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" Background="#F9FDFD">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#F9FDFD" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E8F5F4" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="WPF-UI" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="4.3.0" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <!-- gong-wpf-dragdrop -->
+                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="White" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0FAF9" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="gong-wpf-dragdrop" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="4.0.0" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="BSD-3-Clause" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <!-- SkiaSharp -->
+                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" Background="#F9FDFD">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#F9FDFD" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E8F5F4" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Vertical">
+                                    <TextBlock Text="SkiaSharp" FontSize="12" />
+                                    <TextBlock Text="(transitiv via PDFtoImage)" FontSize="10" Foreground="#888" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="–" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <!-- PDFium (native Bibliothek, mit PDFtoImage ausgeliefert) -->
+                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="White" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0FAF9" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Vertical">
+                                    <TextBlock Text="PDFium" FontSize="12" />
+                                    <TextBlock Text="(nativ, transitiv via PDFtoImage)" FontSize="10" Foreground="#888" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="–" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="BSD-3-Clause" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </ItemsControl.Items>
+                </ItemsControl>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Schließen-Button -->
+        <Border Grid.Row="2" Padding="24,12"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                BorderThickness="0,1,0,0">
+            <ui:Button Content="Schließen"
+                       Appearance="Primary"
+                       HorizontalAlignment="Right"
+                       Click="SchließenKlick" />
+        </Border>
+    </Grid>
+</ui:FluentWindow>

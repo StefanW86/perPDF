@@ -1,0 +1,23 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+
+  <!-- Erzeugt perPDF.msi aus dem Buildausgabeordner von PdfEditor.
+       Baut bei jedem Solution-Build mit (Teil der .sln) und wird durch die
+       ProjectReference stets nach PdfEditor gebaut. -->
+  <PropertyGroup>
+    <OutputName>perPDF</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <!-- Deutsche Installer-UI (WixUI_Advanced-Dialoge), passend zur de-DE-App -->
+    <Cultures>de-DE</Cultures>
+    <!-- ICE57: Fehlalarm fuer dual-purpose Pakete mit HKMU-KeyPath der
+         Startmenueverknuepfung (HKMU loest konsistent zu HKCU bzw. HKLM auf). -->
+    <SuppressIces>ICE57</SuppressIces>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Stellt die Buildreihenfolge sicher und liefert $(var.PdfEditor.TargetDir) -->
+    <ProjectReference Include="..\PdfEditor\PdfEditor.csproj" />
+    <!-- Stock-Dialogsatz WixUI_Advanced (Auswahl pro Benutzer / pro System) -->
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+  </ItemGroup>
+
+</Project>

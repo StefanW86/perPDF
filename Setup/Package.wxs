@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <!-- Version stammt aus Setup\Version.wxi, das bei jedem Build von
+       PdfEditor\BuildNummerErhoehen.ps1 neu geschrieben wird. -->
+  <?include Version.wxi ?>
+
+  <Package
+      Name="perPDF"
+      Manufacturer="perPDF"
+      Version="$(var.ProduktVersion)"
+      UpgradeCode="{C7A4F0E2-3B6D-4F1A-9E2C-8D5B1A7F4C90}"
+      Compressed="yes"
+      InstallerVersion="500">
+
+    <SummaryInformation Description="perPDF – PDF-Editor" Manufacturer="perPDF" />
+
+    <!-- Auswahl „pro Benutzer / pro System" ueber den Stock-Dialogsatz WixUI_Advanced.
+         Die eigentliche Wahl steckt im InstallScopeDlg, erreichbar ueber die Schaltflaeche
+         „Erweitert" auf der Willkommensseite. InstallScopeDlg setzt ALLUSERS abhaengig
+         von der Auswahl: „Fuer alle Benutzer" -> 1, „Nur fuer mich" -> {} (leer).
+         Der Ein-Klick-Pfad (Schaltflaeche „Installieren") durchlaeuft InstallScopeDlg
+         NICHT und nutzt daher den Standard: WiX v5 setzt Package/@Scope implizit auf
+         „perMachine" und damit ALLUSERS=1 = pro System (Program Files, erhoehte Rechte).
+         WixAppFolder steuert die Vorauswahl der Radiobuttons im InstallScopeDlg. -->
+    <Property Id="ApplicationFolderName" Value="perPDF" />
+    <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+
+    <ui:WixUI Id="WixUI_Advanced" />
+    <WixVariable Id="WixUILicenseRtf" Value="Lizenz.rtf" />
+
+    <!-- WixUI_Advanced setzt den Pro-System-Ordner abhaengig von der internen
+         Variable WixUIAdvancedArch; bei 64-bit-Paketen greift das nicht zuverlaessig
+         (WiX-Issue #5908), sodass nach „Program Files (x86)" installiert wuerde.
+         Wir ueberschreiben WixPerMachineFolder daher explizit mit dem 64-bit-
+         Programmverzeichnis – direkt bevor WixSetPerMachineFolder diesen Wert nach
+         APPLICATIONFOLDER kopiert (gilt fuer UI- und stille Installation). -->
+    <SetProperty Id="WixPerMachineFolder"
+                 Value="[ProgramFiles64Folder][ApplicationFolderName]"
+                 Before="WixSetPerMachineFolder" Sequence="both" />
+
+    <!-- Aeltere Version automatisch entfernen und durch die neue ersetzen (Auto-Update).
+         Gleiche Version darf erneut installiert werden (Reparatur). -->
+    <MajorUpgrade
+        AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="Eine neuere Version von perPDF ist bereits installiert." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Nach dem Schreiben der Registry-Eintraege die Windows-Shell ueber die
+         geaenderten Dateizuordnungen benachrichtigen (SHChangeNotify), damit der
+         Explorer die „Oeffnen mit"-Liste sofort aktualisiert. Laeuft als immediate
+         Aktion NACH InstallFinalize (perPDF.exe ist dann vorhanden) und impersoniert
+         den installierenden Benutzer, dessen Shell so die Meldung erhaelt. Fehler
+         werden ignoriert; bei Deinstallation uebersprungen (EXE ist dann entfernt). -->
+    <CustomAction Id="ShellBenachrichtigen"
+                  Directory="APPLICATIONFOLDER"
+                  ExeCommand="&quot;[APPLICATIONFOLDER]perPDF.exe&quot; --dateizuordnung-aktualisieren"
+                  Execute="immediate"
+                  Impersonate="yes"
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="ShellBenachrichtigen" After="InstallFinalize" Condition="NOT REMOVE" />
+    </InstallExecuteSequence>
+
+    <!-- Beim Upgrade (WIX_UPGRADE_DETECTED, von MajorUpgrade automatisch gesetzt,
+         sobald eine aeltere Version gefunden wurde) gilt die Lizenz als bereits
+         akzeptiert: die Willkommen/Lizenz-Seite des Stock-Dialogsatzes laesst sich
+         zwar nicht ueberspringen (sie ist Teil der referenzierten WixUI_Advanced-
+         Bibliothek und ihre Sequenz-Bedingung "NOT Installed" kann von hier aus
+         nicht ueberschrieben werden), aber die Checkbox erscheint bereits gesetzt
+         und "Installieren" ist sofort anklickbar - kein erneutes Lesen/Bestaetigen
+         der Lizenz noetig. -->
+    <SetProperty Id="LicenseAccepted" Value="1"
+                 After="FindRelatedProducts" Condition="WIX_UPGRADE_DETECTED" Sequence="both" />
+
+    <!-- Symbol in „Apps &amp; Features" / „Programme und Funktionen" -->
+    <Icon Id="perpdf.ico" SourceFile="..\PdfEditor\perpdf.ico" />
+    <Property Id="ARPPRODUCTICON" Value="perpdf.ico" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+
+    <!-- Zielordner = APPLICATIONFOLDER (Pflicht-Id fuer WixUI_Advanced). Der Dialogsatz
+         biegt den Pfad je nach Scope automatisch um: pro System -> [ProgramFiles64Folder]perPDF,
+         pro Benutzer -> [LocalAppDataFolder]Apps\perPDF. -->
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="APPLICATIONFOLDER" Name="perPDF" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+
+    <Feature Id="Hauptprogramm" Title="perPDF" Level="1">
+      <ComponentGroupRef Id="Produktdateien" />
+      <ComponentRef Id="Startmenueverknuepfung" />
+      <ComponentRef Id="PdfDateizuordnung" />
+    </Feature>
+
+  </Package>
+
+  <!-- Alle Dateien aus dem Buildausgabeordner von PdfEditor automatisch einsammeln
+       (perPDF.exe, alle Abhaengigkeiten, de-DE\, pdfium.dll, libSkiaSharp.dll …). -->
+  <Fragment>
+    <ComponentGroup Id="Produktdateien" Directory="APPLICATIONFOLDER">
+      <Files Include="$(var.PdfEditor.TargetDir)**" />
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Startmenue-Verknuepfung. HKMU-Schluessel als KeyPath: landet je nach
+       Installationsmodus automatisch in HKLM (pro System) bzw. HKCU (pro Benutzer). -->
+  <Fragment>
+    <Component Id="Startmenueverknuepfung" Directory="ProgramMenuFolder" Guid="*">
+      <Shortcut Id="StartmenuePerPDF"
+                Name="perPDF"
+                Description="PDF-Editor perPDF"
+                Target="[APPLICATIONFOLDER]perPDF.exe"
+                WorkingDirectory="APPLICATIONFOLDER"
+                Icon="perpdf.ico" />
+      <RemoveFolder Id="ProgramMenuFolder" On="uninstall" />
+      <RegistryValue Root="HKMU" Key="Software\perPDF" Name="installiert"
+                     Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+  <!-- PDF-Dateizuordnung. Alle Schluessel als HKMU: landen je nach Installationsmodus
+       automatisch in HKLM (pro System = alle Benutzer) bzw. HKCU (pro Benutzer).
+       perPDF wird NUR als moegliche PDF-Anwendung registriert (ProgID + „Oeffnen mit"-
+       Liste + Capabilities/RegisteredApplications), aber bewusst NICHT als Standard
+       gesetzt: Es gibt keinen Eintrag fuer den (Standard)-Wert von .pdf. Unter Windows 8+
+       kann der Standardhandler ohnehin nur vom Benutzer selbst gesetzt werden. -->
+  <Fragment>
+    <Component Id="PdfDateizuordnung" Directory="APPLICATIONFOLDER" Guid="*">
+
+      <!-- ProgID: beschreibt, wie perPDF eine PDF-Datei oeffnet. -->
+      <RegistryKey Root="HKMU" Key="Software\Classes\perPDF.Dokument">
+        <RegistryValue Type="string" Value="PDF-Dokument" />
+        <RegistryValue Key="DefaultIcon" Type="string"
+                       Value="[APPLICATIONFOLDER]perPDF.exe,0" />
+        <RegistryValue Key="shell\open\command" Type="string"
+                       Value="&quot;[APPLICATIONFOLDER]perPDF.exe&quot; &quot;%1&quot;" />
+      </RegistryKey>
+
+      <!-- .pdf mit der ProgID verknuepfen, OHNE Standard zu werden -> Eintrag in
+           der „Oeffnen mit"-Liste (leerer REG_SZ-Wert, Name = ProgID). -->
+      <RegistryValue Root="HKMU" Key="Software\Classes\.pdf\OpenWithProgIds"
+                     Name="perPDF.Dokument" Type="string" Value="" />
+
+      <!-- Capabilities: zeigt perPDF im „Standard-Apps"- und „Oeffnen mit"-Dialog. -->
+      <RegistryValue Root="HKMU" Key="Software\perPDF\Capabilities"
+                     Name="ApplicationName" Type="string" Value="perPDF" />
+      <RegistryValue Root="HKMU" Key="Software\perPDF\Capabilities"
+                     Name="ApplicationDescription" Type="string" Value="PDF-Editor perPDF" />
+      <RegistryValue Root="HKMU" Key="Software\perPDF\Capabilities"
+                     Name="ApplicationIcon" Type="string"
+                     Value="[APPLICATIONFOLDER]perPDF.exe,0" />
+      <RegistryValue Root="HKMU" Key="Software\perPDF\Capabilities\FileAssociations"
+                     Name=".pdf" Type="string" Value="perPDF.Dokument" />
+
+      <!-- App bei den registrierten Anwendungen anmelden (KeyPath). -->
+      <RegistryValue Root="HKMU" Key="Software\RegisteredApplications"
+                     Name="perPDF" Type="string"
+                     Value="Software\perPDF\Capabilities" KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+</Wix>

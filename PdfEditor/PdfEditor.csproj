@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WPF-Desktopanwendung für .NET 8, nur für Windows x64 -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RootNamespace>PdfEditor</RootNamespace>
+    <AssemblyName>perPDF</AssemblyName>
+    <Product>perPDF</Product>
+    <ApplicationIcon>perpdf.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <!-- Deutsche Programmoberfläche als Standardkultur -->
+    <UICulture>de-DE</UICulture>
+  </PropertyGroup>
+
+  <!-- Im Release keine PDB-Dateien ausgeben – werden zur Laufzeit nicht benötigt -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
+    <PackageReference Include="PdfPig" Version="0.1.14" />
+    <PackageReference Include="PdfSharp" Version="6.2.4" />
+    <PackageReference Include="PDFtoImage" Version="5.2.1" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- App-Icon auch als Ressource für das Fenster-Icon einbinden -->
+    <Resource Include="perpdf.ico" />
+  </ItemGroup>
+
+  <!-- Pre-Build: Buildnummer inkrementieren und BuildInfo.g.cs erzeugen -->
+  <Target Name="BuildNummerInkrementieren" BeforeTargets="CoreCompile">
+    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\BuildNummerErhoehen.ps1&quot; -ProjektVerzeichnis &quot;$(MSBuildProjectDirectory)&quot;" />
+  </Target>
+
+  <!-- Native PDB von SkiaSharp im Release-Ordner entfernen (nicht benötigt) -->
+  <Target Name="NativePdbEntfernen" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <Delete Files="$(OutputPath)libSkiaSharp.pdb" />
+  </Target>
+
+</Project>

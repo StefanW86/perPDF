@@ -1,0 +1,216 @@
+<ui:FluentWindow x:Class="PdfEditor.Windows.ZusammenführenFenster"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:dd="urn:gong-wpf-dragdrop"
+                 xmlns:m="clr-namespace:PdfEditor.Models"
+                 Title="Dokumente zusammenführen"
+                 Width="1100" Height="700"
+                 MinWidth="700" MinHeight="450"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round"
+                 AllowDrop="True"
+                 Drop="Fenster_Drop"
+                 DragOver="Fenster_DragOver">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Titelleiste -->
+        <ui:TitleBar Grid.Row="0" Title="Dokumente zusammenführen" />
+
+        <!-- Symbolleiste -->
+        <Border Grid.Row="1" Padding="12,6" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <ui:Button Content="Zweites Dokument öffnen"
+                               Icon="{ui:SymbolIcon FolderOpen24}"
+                               Margin="2"
+                               Click="ZweitesDokumentÖffnen_Click" />
+                    <ui:Button Content="Ganzes Dokument anhängen"
+                               Icon="{ui:SymbolIcon ArrowCircleDown24}"
+                               Margin="2"
+                               Click="GanzesDokumentAnhängen_Click" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <ui:Button Content="Zusammenführen"
+                               Icon="{ui:SymbolIcon Checkmark24}"
+                               Appearance="Primary"
+                               Margin="2"
+                               Click="Zusammenführen_Click" />
+                    <ui:Button Content="Abbrechen"
+                               Icon="{ui:SymbolIcon Dismiss24}"
+                               Margin="2"
+                               Click="Abbrechen_Click" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Hauptbereich: zwei Seitenlisten nebeneinander -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Linke Seite: aktuelles Dokument -->
+            <DockPanel Grid.Column="0">
+                <Border DockPanel.Dock="Top" Padding="10,6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                        BorderThickness="0,0,0,1">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Aktuelles Dokument: " FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding LinkeDateiname}"
+                                   VerticalAlignment="Center"
+                                   Foreground="#0E7C7B"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="300" />
+                    </StackPanel>
+                </Border>
+
+                <ListBox x:Name="LinkeListBox"
+                         ItemsSource="{Binding LinkeSeiten}"
+                         HorizontalContentAlignment="Center"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         dd:DragDrop.IsDragSource="True"
+                         dd:DragDrop.IsDropTarget="True"
+                         dd:DragDrop.DropHandler="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type m:ZusammenführSeite}">
+                            <StackPanel Margin="6" HorizontalAlignment="Center" Width="110">
+                                <StackPanel.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Seite löschen" Click="LinkeSeiteKontextLöschen_Click" />
+                                    </ContextMenu>
+                                </StackPanel.ContextMenu>
+                                <Border BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                        BorderThickness="1" Background="White" Padding="2">
+                                    <Image Source="{Binding Vorschau}" Stretch="Uniform"
+                                           Width="100" Height="140" />
+                                </Border>
+                                <TextBlock Text="{Binding AnzeigeNummer}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,4,0,0"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
+                          Background="Transparent" />
+
+            <!-- Rechte Seite: zweites Dokument -->
+            <DockPanel Grid.Column="2">
+                <Border DockPanel.Dock="Top" Padding="10,6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                        BorderThickness="1,0,0,1">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Zweites Dokument: " FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding RechteDateiname}"
+                                   VerticalAlignment="Center"
+                                   Foreground="#0E7C7B"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="300" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Drop-Zone wenn rechtes Dokument leer -->
+                <Border x:Name="DropZone"
+                        DockPanel.Dock="Bottom"
+                        Margin="20"
+                        BorderBrush="#15A39A"
+                        BorderThickness="2"
+                        CornerRadius="8"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RechteSeiten.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="📄" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                        <TextBlock Text="PDF hierher ziehen" FontSize="16" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" Foreground="#0E7C7B" />
+                        <TextBlock Text="oder 'Zweites Dokument öffnen' klicken"
+                                   FontSize="12" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <ListBox x:Name="RechteListBox"
+                         ItemsSource="{Binding RechteSeiten}"
+                         HorizontalContentAlignment="Center"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         SelectionMode="Extended"
+                         dd:DragDrop.IsDragSource="True"
+                         dd:DragDrop.DropHandler="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                    <ListBox.Style>
+                        <Style TargetType="ListBox">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RechteSeiten.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Style>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type m:ZusammenführSeite}">
+                            <StackPanel Margin="6" HorizontalAlignment="Center" Width="110">
+                                <Border BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                        BorderThickness="1" Background="White" Padding="2">
+                                    <Image Source="{Binding Vorschau}" Stretch="Uniform"
+                                           Width="100" Height="140" />
+                                </Border>
+                                <TextBlock Text="{Binding AnzeigeNummer}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,4,0,0"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Grid>
+
+        <!-- Statuszeile -->
+        <Border Grid.Row="3" Padding="12,6" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <TextBlock x:Name="StatusText"
+                       Text="Seiten per Drag &amp; Drop zwischen den Listen verschieben oder PDF-Dateien aus dem Explorer hierher ziehen."
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Border>
+    </Grid>
+</ui:FluentWindow>
