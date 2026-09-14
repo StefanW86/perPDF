@@ -60,11 +60,19 @@ Die fertige Anwendung liegt anschließend unter
 
 Fertige MSI-Installer werden automatisch per GitHub Actions gebaut und als
 [Release](https://github.com/StefanW86/perPDF/releases/latest) veröffentlicht.
-Die aktuellste Version ist immer unter dieser festen URL erreichbar:
+Die aktuellste Version ist immer unter diesen festen URLs erreichbar:
 
 ```
 https://github.com/StefanW86/perPDF/releases/latest/download/perPDF.msi
 ```
+
+(Redirect auf das aktuellste Release-Asset)
+
+```
+https://stefanw86.github.io/perPDF/perPDF.msi
+```
+
+(GitHub Pages – liefert die Datei direkt aus, ohne Weiterleitung)
 
 ### Interaktiv
 
