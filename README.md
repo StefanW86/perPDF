@@ -56,6 +56,53 @@ dotnet run --project PdfEditor -c Release
 Die fertige Anwendung liegt anschließend unter
 `PdfEditor\bin\Release\net8.0-windows\perPDF.exe`.
 
+## Installation
+
+Fertige MSI-Installer werden automatisch per GitHub Actions gebaut und als
+[Release](https://github.com/StefanW86/perPDF/releases/latest) veröffentlicht.
+Die aktuellste Version ist immer unter dieser festen URL erreichbar:
+
+```
+https://github.com/StefanW86/perPDF/releases/latest/download/perPDF.msi
+```
+
+### Interaktiv
+
+MSI-Datei doppelklicken und dem Installationsassistenten folgen. Über die
+Schaltfläche „Erweitert“ auf der Willkommensseite lässt sich zwischen
+„Für alle Benutzer“ (Program Files, Admin-Rechte) und „Nur für mich“ wählen.
+
+### Silent / unbeaufsichtigt
+
+```powershell
+msiexec /i perPDF.msi /quiet /norestart
+```
+
+Mit Installationsprotokoll:
+
+```powershell
+msiexec /i perPDF.msi /qn /norestart /log install.log
+```
+
+Bei stiller Installation wird immer **pro System** installiert (Program
+Files, `ALLUSERS=1`), da der Dialog zur Auswahl „nur für mich“ dabei
+übersprungen wird – dafür sind **Administratorrechte** (erhöhte
+Eingabeaufforderung) erforderlich.
+
+### Deinstallation
+
+Über „Apps & Features“ in Windows, oder silent:
+
+```powershell
+msiexec /x perPDF.msi /quiet /norestart
+```
+
+### Update
+
+Eine neuere Version kann direkt über die alte installiert werden
+(`msiexec /i` mit der neuen MSI) – ältere Versionen werden automatisch
+entfernt und ersetzt (Major Upgrade).
+
 ## Hinweise
 
 - „Unterschrift“ bezeichnet ein eingefügtes Bild, **keine** kryptografische
