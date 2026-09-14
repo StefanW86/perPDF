@@ -37,3 +37,17 @@ jobs:
           files: |
             ${{ steps.msi.outputs.path }}
           generate_release_notes: true
+
+      - name: Download-Ordner für GitHub Pages vorbereiten
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path pages-publish | Out-Null
+          Copy-Item "${{ steps.msi.outputs.path }}" "pages-publish/perPDF.msi"
+
+      - name: Auf GitHub Pages veröffentlichen (stabile Download-URL ohne Redirect)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: pages-publish
+          publish_branch: gh-pages
+          keep_files: false
