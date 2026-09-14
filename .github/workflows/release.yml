@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: .NET einrichten
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: MSI bauen
+        run: dotnet build PdfEditor.sln -c Release
+
+      - name: MSI finden
+        id: msi
+        shell: pwsh
+        run: |
+          $msi = Get-ChildItem -Path Setup -Recurse -Filter "perPDF.msi" | Select-Object -First 1
+          if (-not $msi) { throw "perPDF.msi nicht gefunden" }
+          echo "path=$($msi.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ steps.msi.outputs.path }}
+          generate_release_notes: true
