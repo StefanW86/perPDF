@@ -2,6 +2,6 @@
 namespace PdfEditor;
 internal static class BuildInfo
 {
-    public const string Version = "1.104";
+    public const string Version = "1.107";
     public const string Jahr = "2026";
 }
