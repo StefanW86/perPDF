@@ -28,6 +28,18 @@
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
 
     <ui:WixUI Id="WixUI_Advanced" />
+
+    <!-- „Nur fuer mich" ohne UAC-Abfrage: Der Stock-InstallScopeDlg setzt fuer pro Benutzer
+         nur ALLUSERS={} (leer). Ohne Word-Count-Bit 3 fragt Windows Installer dann trotzdem
+         nach Adminrechten. Der dokumentierte Weg fuer Pakete mit beiden Varianten
+         (Windows Installer 5.0, „Single Package Authoring") ist ALLUSERS=2 +
+         MSIINSTALLPERUSER=1 - das setzen wir nach den Stock-Ereignissen (Order 1-7). -->
+    <UI>
+      <Publish Dialog="InstallScopeDlg" Control="Next" Property="ALLUSERS" Value="2"
+               Order="8" Condition="WixAppFolder = &quot;WixPerUserFolder&quot;" />
+      <Publish Dialog="InstallScopeDlg" Control="Next" Property="MSIINSTALLPERUSER" Value="1"
+               Order="9" Condition="WixAppFolder = &quot;WixPerUserFolder&quot;" />
+    </UI>
     <WixVariable Id="WixUILicenseRtf" Value="Lizenz.rtf" />
 
     <!-- WixUI_Advanced setzt den Pro-System-Ordner abhaengig von der internen
@@ -47,23 +59,6 @@
         DowngradeErrorMessage="Eine neuere Version von perPDF ist bereits installiert." />
 
     <MediaTemplate EmbedCab="yes" />
-
-    <!-- Nach dem Schreiben der Registry-Eintraege die Windows-Shell ueber die
-         geaenderten Dateizuordnungen benachrichtigen (SHChangeNotify), damit der
-         Explorer die „Oeffnen mit"-Liste sofort aktualisiert. Laeuft als immediate
-         Aktion NACH InstallFinalize (perPDF.exe ist dann vorhanden) und impersoniert
-         den installierenden Benutzer, dessen Shell so die Meldung erhaelt. Fehler
-         werden ignoriert; bei Deinstallation uebersprungen (EXE ist dann entfernt). -->
-    <CustomAction Id="ShellBenachrichtigen"
-                  Directory="APPLICATIONFOLDER"
-                  ExeCommand="&quot;[APPLICATIONFOLDER]perPDF.exe&quot; --dateizuordnung-aktualisieren"
-                  Execute="immediate"
-                  Impersonate="yes"
-                  Return="ignore" />
-
-    <InstallExecuteSequence>
-      <Custom Action="ShellBenachrichtigen" After="InstallFinalize" Condition="NOT REMOVE" />
-    </InstallExecuteSequence>
 
     <!-- Beim Upgrade (WIX_UPGRADE_DETECTED, von MajorUpgrade automatisch gesetzt,
          sobald eine aeltere Version gefunden wurde) gilt die Lizenz als bereits

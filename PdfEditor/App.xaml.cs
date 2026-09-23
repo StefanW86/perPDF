@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using PdfSharp.Fonts;
@@ -22,29 +21,15 @@ public partial class App : Application
         GlobalFontSettings.UseWindowsFontsUnderWindows = true;
     }
 
-    /// <summary>Schalter, mit dem das Setup nur die Shell über geänderte
-    /// Dateizuordnungen benachrichtigt (ohne die Oberfläche zu starten).</summary>
-    private const string SchalterDateizuordnungAktualisieren = "--dateizuordnung-aktualisieren";
-
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Vom Setup nach dem Schreiben der Registry-Einträge aufgerufen: nur die
-        // Windows-Shell benachrichtigen und sofort beenden – kein Fenster anzeigen.
-        if (e.Args.Any(a => string.Equals(a, SchalterDateizuordnungAktualisieren,
-                StringComparison.OrdinalIgnoreCase)))
-        {
-            Services.ShellDienst.ShellBenachrichtigen();
-            Shutdown(0);
-            return;
-        }
-
         base.OnStartup(e);
         // Akzentfarbe der Oberfläche an das grüne perPDF-Logo anpassen.
         ApplicationAccentColorManager.Apply(Color.FromRgb(0x15, 0xA3, 0x9A), ApplicationTheme.Light);
         // Die PDF-Dateizuordnung übernimmt ausschließlich das Setup (scope-abhängig),
         // daher registriert sich die App beim Start nicht mehr selbst.
 
-        // Hauptfenster anzeigen (StartupUri entfällt wegen der Schalter-Auswertung oben).
+        // Hauptfenster anzeigen (ohne StartupUri, direkt hier erzeugt).
         new MainWindow().Show();
     }
 }
