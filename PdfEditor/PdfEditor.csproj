@@ -14,6 +14,10 @@
     <UseWPF>true</UseWPF>
     <!-- Deutsche Programmoberfläche als Standardkultur -->
     <UICulture>de-DE</UICulture>
+    <!-- Versionsattribute schreibt BuildNummerErhoehen.ps1 in BuildInfo.g.cs (einzige Versionsquelle) -->
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
 
   <!-- Im Release keine PDB-Dateien ausgeben – werden zur Laufzeit nicht benötigt -->
@@ -33,9 +37,10 @@
     <Resource Include="perpdf.ico" />
   </ItemGroup>
 
-  <!-- Pre-Build: Buildnummer inkrementieren und BuildInfo.g.cs erzeugen -->
+  <!-- Pre-Build: Buildnummer inkrementieren und BuildInfo.g.cs erzeugen.
+       Release-Builds geben die Version per -p:VersionVorgabe=X.Y.Z (aus dem Git-Tag) vor. -->
   <Target Name="BuildNummerInkrementieren" BeforeTargets="CoreCompile">
-    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\BuildNummerErhoehen.ps1&quot; -ProjektVerzeichnis &quot;$(MSBuildProjectDirectory)&quot;" />
+    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\BuildNummerErhoehen.ps1&quot; -ProjektVerzeichnis &quot;$(MSBuildProjectDirectory)&quot; -Version &quot;$(VersionVorgabe)&quot;" />
   </Target>
 
   <!-- Native PDB von SkiaSharp im Release-Ordner entfernen (nicht benötigt) -->

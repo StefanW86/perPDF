@@ -20,8 +20,15 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      # Das Tag (vX.Y.Z) ist die Version des Releases: App-Anzeige, EXE-Dateiversion
+      # und MSI-Version werden daraus erzeugt, damit alle Stellen identisch sind.
       - name: MSI bauen
-        run: dotnet build PdfEditor.sln -c Release
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Tag '${{ github.ref_name }}' hat nicht das Format vX.Y.Z" }
+          dotnet build PdfEditor.sln -c Release -p:VersionVorgabe=$version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: MSI finden
         id: msi
