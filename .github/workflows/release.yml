@@ -38,11 +38,17 @@ jobs:
           if (-not $msi) { throw "perPDF.msi nicht gefunden" }
           echo "path=$($msi.FullName)" >> $env:GITHUB_OUTPUT
 
+      # Unsigniertes MSIX für die Store-Einreichung (Microsoft signiert es beim Einreichen).
+      - name: MSIX bauen
+        shell: pwsh
+        run: ./Msix/MsixBauen.ps1 -Version ("${{ github.ref_name }}".TrimStart('v'))
+
       - name: Release veröffentlichen
         uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{ steps.msi.outputs.path }}
+            Msix/bin/perPDF.msix
           generate_release_notes: true
 
       - name: Download-Ordner für GitHub Pages vorbereiten

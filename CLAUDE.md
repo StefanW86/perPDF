@@ -20,6 +20,7 @@ dotnet run --project PdfEditor -c Release
 Output binary: `PdfEditor\bin\Release\net8.0-windows\win-x64\perPDF.exe`. Product is branded **perPDF**; `AssemblyName`/`Product` are `perPDF`, but project, `RootNamespace`, and namespaces remain `PdfEditor`.
 
 - Windows-only (`net8.0-windows`, `UseWPF`); does not build on Linux/macOS.
+- **MSIX (Microsoft Store):** `Msix\MsixBauen.ps1 [-Version X.Y.Z]` → self-contained `dotnet publish` + `makeappx` (Windows SDK) → unsigned `Msix\bin\perPDF.msix` (the Store signs it). `Msix\AppxManifest.xml` Identity `Name`/`Publisher`/`PublisherDisplayName` must match Partner Center. Package version = EXE file version. Also built by the release workflow.
 - **No test project, linter, or CI.** "Verify" = build + exercise the app manually.
 
 ## Architecture
