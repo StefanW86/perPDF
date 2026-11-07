@@ -1,27 +1,26 @@
 # Wird automatisch vor jedem Build ausgefuehrt.
-# Einzige Quelle der Wahrheit fuer die Version: schreibt BuildInfo.g.cs (Anzeige in der App +
-# Assembly-/Dateiversion der perPDF.exe) und Setup\Version.wxi (MSI-Version).
-# Ohne -Version (lokaler Build): BuildNummer.txt inkrementieren, Version = 1.<Nummer>.0.
-# Mit -Version (Release-Build in CI, aus dem Git-Tag vX.Y.Z): genau diese Version verwenden.
+# Einzige Quelle der Wahrheit fuer die Version ist das Git-Tag vX.Y.Z. Das Skript schreibt
+# BuildInfo.g.cs (Anzeige in der App + Assembly-/Dateiversion der perPDF.exe, daraus die
+# MSIX-Paketversion) und Setup\Version.wxi (MSI-Version). Beide Dateien sind generiert und
+# nicht eingecheckt, damit im Repo keine abweichende Versionsnummer stehen kann.
+# Ohne -Version: juengstes von HEAD erreichbares Tag (git describe).
+# Mit -Version (CI aus dem ausgeloesten Tag, MsixBauen.ps1): genau diese Version.
 
 param(
     [string]$ProjektVerzeichnis,
     [string]$Version
 )
+$ErrorActionPreference = 'Stop'
 
-if ($Version) {
-    if ($Version -notmatch '^\d+\.\d+\.\d+$') {
-        throw "Ungueltige Version '$Version' - erwartet wird X.Y.Z (z. B. 1.109.0)."
+if (-not $Version) {
+    $tag = git -C $ProjektVerzeichnis describe --tags --abbrev=0 --match 'v*' 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $tag) {
+        throw "Keine Version ermittelbar: kein Git-Tag vX.Y.Z gefunden. Version per -p:VersionVorgabe=X.Y.Z angeben."
     }
-} else {
-    $zaehler = 0
-    $datei = Join-Path $ProjektVerzeichnis 'BuildNummer.txt'
-    if (Test-Path $datei) {
-        $zaehler = [int](Get-Content $datei -Raw).Trim()
-    }
-    $zaehler++
-    Set-Content -Path $datei -Value $zaehler -NoNewline -Encoding UTF8
-    $Version = "1.$zaehler.0"
+    $Version = $tag.Trim().TrimStart('v')
+}
+if ($Version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "Ungueltige Version '$Version' - erwartet wird X.Y.Z (z. B. 1.109.0)."
 }
 
 $jahr = (Get-Date).Year

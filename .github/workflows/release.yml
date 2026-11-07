@@ -22,13 +22,16 @@ jobs:
 
       # Das Tag (vX.Y.Z) ist die Version des Releases: App-Anzeige, EXE-Dateiversion
       # und MSI-Version werden daraus erzeugt, damit alle Stellen identisch sind.
-      - name: MSI bauen
+      # Setup gehoert nicht zum normalen Solution-Build (nur Releases) und wird hier explizit gebaut;
+      # danach das unsignierte Msix/bin/perPDF.msix (Store signiert beim Einreichen).
+      - name: MSI und MSIX bauen
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Tag '${{ github.ref_name }}' hat nicht das Format vX.Y.Z" }
-          dotnet build PdfEditor.sln -c Release -p:VersionVorgabe=$version
+          dotnet build Setup/Setup.wixproj -c Release -p:VersionVorgabe=$version
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./Msix/MsixBauen.ps1 -Version $version
 
       - name: MSI finden
         id: msi
@@ -37,11 +40,6 @@ jobs:
           $msi = Get-ChildItem -Path Setup -Recurse -Filter "perPDF.msi" | Select-Object -First 1
           if (-not $msi) { throw "perPDF.msi nicht gefunden" }
           echo "path=$($msi.FullName)" >> $env:GITHUB_OUTPUT
-
-      # Unsigniertes MSIX für die Store-Einreichung (Microsoft signiert es beim Einreichen).
-      - name: MSIX bauen
-        shell: pwsh
-        run: ./Msix/MsixBauen.ps1 -Version ("${{ github.ref_name }}".TrimStart('v'))
 
       - name: Release veröffentlichen
         uses: softprops/action-gh-release@v2

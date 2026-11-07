@@ -14,7 +14,7 @@
     <UseWPF>true</UseWPF>
     <!-- Deutsche Programmoberfläche als Standardkultur -->
     <UICulture>de-DE</UICulture>
-    <!-- Versionsattribute schreibt BuildNummerErhoehen.ps1 in BuildInfo.g.cs (einzige Versionsquelle) -->
+    <!-- Versionsattribute schreibt VersionSchreiben.ps1 in BuildInfo.g.cs (Quelle: Git-Tag vX.Y.Z) -->
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
@@ -31,16 +31,22 @@
     <PackageReference Include="PdfSharp" Version="6.2.4" />
     <PackageReference Include="PDFtoImage" Version="5.2.1" />
     <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <!-- Nur Werkzeug für den Release-Build (makeappx.exe für Msix\MsixBauen.ps1), wird weder importiert noch ausgeliefert -->
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.9457" ExcludeAssets="all" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <!-- App-Icon auch als Ressource für das Fenster-Icon einbinden -->
     <Resource Include="perpdf.ico" />
   </ItemGroup>
 
-  <!-- Pre-Build: Buildnummer inkrementieren und BuildInfo.g.cs erzeugen.
-       Release-Builds geben die Version per -p:VersionVorgabe=X.Y.Z (aus dem Git-Tag) vor. -->
-  <Target Name="BuildNummerInkrementieren" BeforeTargets="CoreCompile">
-    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\BuildNummerErhoehen.ps1&quot; -ProjektVerzeichnis &quot;$(MSBuildProjectDirectory)&quot; -Version &quot;$(VersionVorgabe)&quot;" />
+  <!-- Pre-Build: BuildInfo.g.cs + Setup\Version.wxi aus dem Git-Tag erzeugen.
+       Release-Builds geben die Version per -p:VersionVorgabe=X.Y.Z (aus dem Tag) vor. -->
+  <Target Name="VersionSchreiben" BeforeTargets="CoreCompile">
+    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\VersionSchreiben.ps1&quot; -ProjektVerzeichnis &quot;$(MSBuildProjectDirectory)&quot; -Version &quot;$(VersionVorgabe)&quot;" />
+    <!-- Datei ist nicht eingecheckt: im frischen Klon existiert sie bei der Auswertung noch nicht -->
+    <ItemGroup>
+      <Compile Include="BuildInfo.g.cs" Exclude="@(Compile)" />
+    </ItemGroup>
   </Target>
 
   <!-- Native PDB von SkiaSharp im Release-Ordner entfernen (nicht benötigt) -->
