@@ -145,7 +145,7 @@
                                     <ColumnDefinition Width="110" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="PDFtoImage" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="5.2.1" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="5.4.0" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
@@ -168,7 +168,7 @@
                                     <ColumnDefinition Width="110" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="PdfPig" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="0.1.14" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="0.1.16" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="2" Text="Apache 2.0" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>

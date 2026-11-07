@@ -80,6 +80,18 @@ public class PdfTextDienst
                     double x2 = Math.Max(b.Left, b.Right) + versatzX;
                     double y1 = Math.Min(b.Bottom, b.Top) + versatzY;
                     double y2 = Math.Max(b.Bottom, b.Top) + versatzY;
+
+                    // Glyphenboxen enden oft an der Grundlinie (keine/ungenaue Unterlängen),
+                    // die Markierung sähe unten abgeschnitten aus. Daher auf die typische
+                    // Schrifthöhe (Unterlänge ~25 %, Oberlänge ~80 % der Schriftgröße) erweitern.
+                    var buchstaben = zeilenWörter.SelectMany(w => w.Letters).ToList();
+                    if (buchstaben.Count > 0 && buchstaben.All(l => l.TextOrientation == TextOrientation.Horizontal))
+                    {
+                        double größe = buchstaben.Max(l => l.PointSize);
+                        double grundlinie = buchstaben.Min(l => l.StartBaseLine.Y) + versatzY;
+                        y1 = Math.Min(y1, grundlinie - 0.25 * größe);
+                        y2 = Math.Max(y2, grundlinie + 0.8 * größe);
+                    }
                     ergebnis.Add(new TextZeile(x1, y1, x2, y2, text, zeichenX));
                 }
             }
