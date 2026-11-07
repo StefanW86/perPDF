@@ -107,7 +107,7 @@
                         <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="Background" Value="{DynamicResource PpFläche}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
@@ -153,7 +153,7 @@
                         <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="Background" Value="{DynamicResource PpFläche}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
@@ -199,7 +199,7 @@
                         <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="Background" Value="{DynamicResource PpFläche}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
@@ -248,7 +248,7 @@
                         <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="Background" Value="{DynamicResource PpFläche}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
