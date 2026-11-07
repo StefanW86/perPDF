@@ -44,9 +44,9 @@
                     </Grid>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock FontSize="34" FontWeight="Bold" LineHeight="36">
-                            <Run Text="per" Foreground="#1C2B2A" /><Run Text="PDF" Foreground="#0E7C7B" />
+                            <Run Text="per" Foreground="{DynamicResource PpInk}" /><Run Text="PDF" Foreground="{DynamicResource PpAkzent}" />
                         </TextBlock>
-                        <TextBlock Text="personalPDF" FontSize="12" Foreground="#6B8080" Margin="2,0,0,0" />
+                        <TextBlock Text="personalPDF" FontSize="12" Foreground="{DynamicResource PpGedämpft}" Margin="2,0,0,0" />
                     </StackPanel>
                 </StackPanel>
 
@@ -55,23 +55,23 @@
                            HorizontalAlignment="Center"
                            FontSize="15"
                            Margin="0,0,0,6">
-                    <Run Text="Version " Foreground="#6B8080" />
-                    <Run x:Name="VersionNummer" FontWeight="SemiBold" Foreground="#0E7C7B" />
+                    <Run Text="Version " Foreground="{DynamicResource PpGedämpft}" />
+                    <Run x:Name="VersionNummer" FontWeight="SemiBold" Foreground="{DynamicResource PpAkzent}" />
                 </TextBlock>
 
                 <!-- Copyright -->
                 <TextBlock x:Name="CopyrightHinweis"
                            HorizontalAlignment="Center"
-                           Foreground="#6B8080"
+                           Foreground="{DynamicResource PpGedämpft}"
                            FontSize="12"
                            Margin="0,0,0,20" />
 
                 <Separator Margin="0,0,0,20" />
 
                 <!-- Lizenzhinweis -->
-                <Border Background="#F0FAF9" BorderBrush="#B2DFDB" BorderThickness="1"
+                <Border Background="{DynamicResource PpTeal50}" BorderBrush="{DynamicResource PpTeal200}" BorderThickness="1"
                         CornerRadius="6" Padding="16,12" Margin="0,0,0,24">
-                    <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="20" Foreground="#1C2B2A">
+                    <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="20" Foreground="{DynamicResource PpInk}">
                         Diese Software ist proprietäres Eigentum des Autors.
                         Lizenzbestimmungen werden zu einem späteren Zeitpunkt veröffentlicht.
                     </TextBlock>
@@ -80,11 +80,11 @@
                 <!-- Drittanbieter-Bibliotheken -->
                 <TextBlock Text="Verwendete Bibliotheken"
                            FontSize="14" FontWeight="SemiBold"
-                           Foreground="#1C2B2A"
+                           Foreground="{DynamicResource PpInk}"
                            Margin="0,0,0,10" />
 
                 <!-- Tabellenkopf -->
-                <Border Background="#0E7C7B" CornerRadius="4,4,0,0" Padding="10,6">
+                <Border Background="{DynamicResource PpAkzent}" CornerRadius="4,4,0,0" Padding="10,6">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -92,11 +92,11 @@
                             <ColumnDefinition Width="110" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Bibliothek" FontWeight="SemiBold"
-                                   Foreground="White" FontSize="12" />
+                                   Foreground="{DynamicResource PpAufAkzent}" FontSize="12" />
                         <TextBlock Grid.Column="1" Text="Version" FontWeight="SemiBold"
-                                   Foreground="White" FontSize="12" />
+                                   Foreground="{DynamicResource PpAufAkzent}" FontSize="12" />
                         <TextBlock Grid.Column="2" Text="Lizenz" FontWeight="SemiBold"
-                                   Foreground="White" FontSize="12" />
+                                   Foreground="{DynamicResource PpAufAkzent}" FontSize="12" />
                     </Grid>
                 </Border>
 
@@ -104,13 +104,13 @@
                 <ItemsControl>
                     <ItemsControl.Items>
                         <!-- PdfSharp -->
-                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1">
+                        <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="White" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0FAF9" />
+                                            <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -122,18 +122,18 @@
                                     <ColumnDefinition Width="110" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="PdfSharp" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="6.2.4" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="6.2.4" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                         <!-- PDFtoImage -->
-                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" Background="#F9FDFD">
+                        <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1" Background="{DynamicResource PpZeileAlt}">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="#F9FDFD" />
+                                    <Setter Property="Background" Value="{DynamicResource PpZeileAlt}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#E8F5F4" />
+                                            <Setter Property="Background" Value="{DynamicResource PpTeal100}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -145,18 +145,18 @@
                                     <ColumnDefinition Width="110" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="PDFtoImage" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="5.2.1" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="5.2.1" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                         <!-- PdfPig -->
-                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1">
+                        <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="White" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0FAF9" />
+                                            <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -168,18 +168,18 @@
                                     <ColumnDefinition Width="110" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="PdfPig" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="0.1.14" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="Apache 2.0" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="0.1.14" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="Apache 2.0" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                         <!-- WPF-UI -->
-                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" Background="#F9FDFD">
+                        <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1" Background="{DynamicResource PpZeileAlt}">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="#F9FDFD" />
+                                    <Setter Property="Background" Value="{DynamicResource PpZeileAlt}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#E8F5F4" />
+                                            <Setter Property="Background" Value="{DynamicResource PpTeal100}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -191,18 +191,18 @@
                                     <ColumnDefinition Width="110" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="WPF-UI" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="4.3.0" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="4.3.0" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                         <!-- gong-wpf-dragdrop -->
-                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1">
+                        <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="White" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0FAF9" />
+                                            <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -214,18 +214,18 @@
                                     <ColumnDefinition Width="110" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="gong-wpf-dragdrop" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="4.0.0" FontSize="12" Foreground="#555" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="BSD-3-Clause" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="4.0.0" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="BSD-3-Clause" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                         <!-- SkiaSharp -->
-                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" Background="#F9FDFD">
+                        <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1" Background="{DynamicResource PpZeileAlt}">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="#F9FDFD" />
+                                    <Setter Property="Background" Value="{DynamicResource PpZeileAlt}" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#E8F5F4" />
+                                            <Setter Property="Background" Value="{DynamicResource PpTeal100}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -238,20 +238,20 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical">
                                     <TextBlock Text="SkiaSharp" FontSize="12" />
-                                    <TextBlock Text="(transitiv via PDFtoImage)" FontSize="10" Foreground="#888" />
+                                    <TextBlock Text="(transitiv via PDFtoImage)" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </StackPanel>
-                                <TextBlock Grid.Column="1" Text="–" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="–" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="MIT" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                         <!-- PDFium (native Bibliothek, mit PDFtoImage ausgeliefert) -->
-                        <Border Padding="10,7" BorderBrush="#DCE8E8" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4">
+                        <Border Padding="10,7" BorderBrush="{DynamicResource PpHaarlinie}" BorderThickness="1,0,1,1" CornerRadius="0,0,4,4">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="White" />
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0FAF9" />
+                                            <Setter Property="Background" Value="{DynamicResource PpTeal50}" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -264,10 +264,10 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical">
                                     <TextBlock Text="PDFium" FontSize="12" />
-                                    <TextBlock Text="(nativ, transitiv via PDFtoImage)" FontSize="10" Foreground="#888" />
+                                    <TextBlock Text="(nativ, transitiv via PDFtoImage)" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </StackPanel>
-                                <TextBlock Grid.Column="1" Text="–" FontSize="12" Foreground="#999" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="BSD-3-Clause" FontSize="12" Foreground="#0E7C7B" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="–" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="BSD-3-Clause" FontSize="12" Foreground="{DynamicResource PpAkzent}" VerticalAlignment="Center" />
                             </Grid>
                         </Border>
                     </ItemsControl.Items>

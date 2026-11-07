@@ -386,6 +386,8 @@ public partial class HauptViewModel : BeobachtbaresObjekt
                 Melde(nameof(FeldIstListenfeld));
                 Melde(nameof(FeldIstText));
                 Melde(nameof(FeldFormatRelevant));
+                Melde(nameof(FeldTypText));
+                Melde(nameof(FeldHatEingabe));
             }
         }
     }
@@ -410,6 +412,12 @@ public partial class HauptViewModel : BeobachtbaresObjekt
 
     /// <summary>Verfügbare Ausrichtungen für die Auswahl in der Seitenleiste.</summary>
     public Array AusrichtungWerte => Enum.GetValues(typeof(TextAusrichtung));
+
+    /// <summary>Untertitel der Eigenschaften-Leiste, z. B. „Textfeld · Entwurf“.</summary>
+    public string FeldTypText => _ausgewähltesFeld is null ? "" : $"{FeldBezeichnung(_ausgewähltesFeld.Typ)} · Entwurf";
+
+    /// <summary>Abschnitt „Eingabe“ nur, wenn der Feldtyp Optionen oder Texteigenschaften hat.</summary>
+    public bool FeldHatEingabe => FeldHatOptionen || FeldIstText;
 
     /// <summary>Verfügbare Eingabeformate für die Auswahl in der Seitenleiste.</summary>
     public Array FormatWerte => Enum.GetValues(typeof(FeldFormat));

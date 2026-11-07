@@ -11,6 +11,8 @@ public class FensterZustand
     public double Breite { get; set; }
     public double Höhe { get; set; }
     public bool Maximiert { get; set; }
+    /// <summary>Vom Nutzer gewähltes Design (true = dunkel); <c>null</c> = dem Windows-Design folgen.</summary>
+    public bool? DunkelGewählt { get; set; }
 }
 
 /// <summary>

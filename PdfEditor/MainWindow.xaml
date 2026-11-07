@@ -25,51 +25,185 @@
         <conv:InvertBoolToVisibilityConverter x:Key="InvertBoolZuSichtbar" />
         <!-- Konvertiert 0-basierten Seitenindex in 1-basierte Seitennummer (z. B. "S. 3") -->
         <conv:SeitenNummerConverter x:Key="SeitenNummer" />
+        <conv:EnumGleichConverter x:Key="EnumGleich" />
 
         <!-- ===== Menüband (Ribbon) ===== -->
-        <!-- Eine Befehlsgruppe: rechter Trennstrich, etwas Innenabstand. -->
+        <!-- Eine Befehlsgruppe: rechter Trennstrich (Haarlinie). -->
         <Style x:Key="MenübandGruppe" TargetType="Border">
             <Setter Property="BorderThickness" Value="0,0,1,0" />
-            <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
-            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PpHaarlinie}" />
+            <Setter Property="Padding" Value="8,0" />
         </Style>
         <!-- Untertitel einer Gruppe (z. B. „Datei“). -->
         <Style x:Key="MenübandGruppenTitel" TargetType="TextBlock">
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="11" />
-            <Setter Property="Margin" Value="0,5,0,0" />
+            <Setter Property="Margin" Value="0,2,0,0" />
             <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
         </Style>
-        <!-- Großer Knopf: Symbol über Text, füllt die Gruppenhöhe. -->
-        <Style x:Key="MenübandKnopf" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="MinWidth" Value="58" />
-            <Setter Property="Margin" Value="2,0" />
+        <!-- Großer Knopf: Symbol über Text, ruhig (transparent) bis zum Überfahren. -->
+        <Style x:Key="MenübandKnopf" TargetType="ButtonBase">
+            <Setter Property="MinWidth" Value="56" />
+            <Setter Property="Margin" Value="1,0" />
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ButtonBase">
+                        <Border x:Name="Rahmen" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Rahmen" Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}" />
+                                <Setter TargetName="Rahmen" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Rahmen" Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
-        <!-- Speichern-Knopf: bei Änderungen in Akzentfarbe hervorgehoben. -->
-        <Style x:Key="MenübandSpeichern" TargetType="Button" BasedOn="{StaticResource MenübandKnopf}">
+        <!-- Umschalt-Knopf (Modi): eingeschaltet als Teal-Tönung. -->
+        <Style x:Key="MenübandUmschalter" TargetType="ToggleButton" BasedOn="{StaticResource MenübandKnopf}">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IstGeändert}" Value="True">
-                    <Setter Property="Background" Value="#0E7C7B" />
-                    <Setter Property="BorderBrush" Value="#0B5F5E" />
-                    <Setter Property="Foreground" Value="White" />
-                </DataTrigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource PpTeal100}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource PpTeal200}" />
+                    <Setter Property="Foreground" Value="{DynamicResource PpAkzent}" />
+                </Trigger>
             </Style.Triggers>
         </Style>
-        <!-- Umschalt-Knopf (Modi) im selben großen Format. -->
-        <Style x:Key="MenübandUmschalter" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-            <Setter Property="MinWidth" Value="58" />
-            <Setter Property="Margin" Value="2,0" />
-            <Setter Property="Padding" Value="8,6" />
-            <Setter Property="VerticalAlignment" Value="Stretch" />
+        <!-- Kleiner quadratischer Symbolknopf (Titelleiste, Zoom, Karten). -->
+        <Style x:Key="SymbolKnopf" TargetType="ButtonBase" BasedOn="{StaticResource MenübandKnopf}">
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!-- Speichern rechts im Menüband: neutral, bei ungespeicherten Änderungen gefüllter Akzent
+             (höchstens ein gefüllter Akzentknopf je Ansicht). -->
+        <Style x:Key="SpeichernKnopf" TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="12,0,14,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Rahmen" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IstGeändert}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource PpAkzent}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource PpAkzentRand}" />
+                    <Setter Property="Foreground" Value="{DynamicResource PpAufAkzent}" />
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IstGeändert}" Value="True" />
+                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource PpAkzentHover}" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Registerkarte des Menübands: Text, aktiv mit kurzem Teal-Strich darunter. -->
+        <Style x:Key="MenübandReiter" TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid Background="Transparent" Height="34">
+                            <ContentPresenter ContentSource="Header" Margin="12,0"
+                                              VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <Border x:Name="Strich" Width="16" Height="3" CornerRadius="1.5"
+                                    Background="{DynamicResource PpAkzent}" Margin="0,0,0,3"
+                                    VerticalAlignment="Bottom" Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Strich" Property="Visibility" Value="Visible" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Segmentschalter (Seiten / Inhalt). -->
+        <Style x:Key="Segment" TargetType="RadioButton">
+            <Setter Property="Height" Value="28" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Rahmen" CornerRadius="4" Background="Transparent"
+                                BorderBrush="Transparent" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Rahmen" Property="Background" Value="{DynamicResource PpFläche}" />
+                                <Setter TargetName="Rahmen" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <!-- Beschriftung unter einem Knopf-Symbol. -->
         <Style x:Key="MenübandKnopfText" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11" />
-            <Setter Property="Margin" Value="0,3,0,0" />
+            <Setter Property="Margin" Value="0,4,0,0" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+        <!-- Tastenkürzel-Kappe im Startzustand. -->
+        <Style x:Key="Taste" TargetType="Border">
+            <Setter Property="MinWidth" Value="18" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderThickness" Value="1,1,1,2" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PpHaarlinie}" />
+            <Setter Property="Background" Value="{DynamicResource PpFläche}" />
         </Style>
     </ui:FluentWindow.Resources>
 
@@ -79,30 +213,20 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />  <!-- Row 0: TitleBar -->
-            <RowDefinition Height="Auto" />  <!-- Row 1: Toolbar -->
-            <RowDefinition Height="Auto" />  <!-- Row 2: Tab-Leiste -->
+            <RowDefinition Height="Auto" />  <!-- Row 0: Titelleiste (Logo, Dokument-Reiter, Suche) -->
+            <RowDefinition Height="Auto" />  <!-- Row 1: Menüband -->
+            <RowDefinition Height="Auto" />  <!-- Row 2: Modus-Hinweis (Felder bearbeiten) -->
             <RowDefinition Height="*" />     <!-- Row 3: Inhalt -->
             <RowDefinition Height="Auto" />  <!-- Row 4: Status -->
         </Grid.RowDefinitions>
 
-        <!-- Titelleiste im modernen Fluent-Stil -->
-        <ui:TitleBar Grid.Row="0" Title="perPDF" />
-
-        <!-- Menüband (Ribbon): Logo links, Registerkarten rechts -->
-        <Border Grid.Row="1" BorderThickness="0,0,0,1"
-                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!-- Logo: perPDF (oben links, auf Höhe der Registerreiter) -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal"
-                            Margin="12,9,12,0" VerticalAlignment="Top">
-                    <Grid Width="30" Height="30" Margin="0,0,8,0">
-                        <Border CornerRadius="7">
+        <!-- Titelleiste: Signet + Wortbild, Dokument-Reiter, Suche, Fenstersteuerung.
+             Header/TrailingContent bleiben klickbar; freie Fläche dazwischen zieht das Fenster. -->
+        <ui:TitleBar Grid.Row="0" Height="44">
+            <ui:TitleBar.Header>
+                <StackPanel Orientation="Horizontal" Height="44" Margin="12,0,0,0">
+                    <Grid Width="26" Height="26" Margin="0,0,8,0" VerticalAlignment="Center">
+                        <Border CornerRadius="6">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                     <GradientStop Color="#15A39A" Offset="0" />
@@ -110,24 +234,143 @@
                                 </LinearGradientBrush>
                             </Border.Background>
                         </Border>
-                        <Rectangle Width="12" Height="2.6" RadiusX="1.3" RadiusY="1.3" Fill="#FBFAF7"
-                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,9,0,0" />
-                        <Rectangle Width="16" Height="2.6" RadiusX="1.3" RadiusY="1.3" Fill="#FBFAF7" Opacity="0.7"
-                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,14,0,0" />
-                        <Ellipse Width="7" Height="7" Fill="#F4A93B"
-                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,6" />
+                        <Rectangle Width="10" Height="2.3" RadiusX="1.1" RadiusY="1.1" Fill="#FBFAF7"
+                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,8,0,0" />
+                        <Rectangle Width="14" Height="2.3" RadiusX="1.1" RadiusY="1.1" Fill="#FBFAF7" Opacity="0.7"
+                                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,12,0,0" />
+                        <Ellipse Width="6" Height="6" Fill="#F4A93B"
+                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,5" />
                     </Grid>
-                    <TextBlock VerticalAlignment="Center" FontSize="20" FontWeight="Bold">
-                        <Run Text="per" Foreground="#1C2B2A" /><Run Text="PDF" Foreground="#0E7C7B" />
+                    <TextBlock VerticalAlignment="Center" FontSize="17" FontWeight="Bold"
+                               FontFamily="Segoe UI Variable Display, Segoe UI">
+                        <Run Text="per" Foreground="{DynamicResource PpInk}" /><Run Text="PDF" Foreground="{DynamicResource PpAkzent}" />
                     </TextBlock>
+
+                    <!-- Dokument-Reiter. shortcut: kein Überlauf-Scrollen bei sehr vielen Tabs,
+                         bei Bedarf auf ein breitenbegrenztes Panel mit Scrollpfeilen umstellen. -->
+                    <ItemsControl x:Name="TabLeiste" Margin="20,0,0,0" VerticalAlignment="Bottom">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:DokumentTab}">
+                                <Border x:Name="TabRahmen"
+                                        Height="36" Margin="0,0,2,0"
+                                        Padding="12,0,6,0"
+                                        CornerRadius="6,6,0,0"
+                                        BorderThickness="1,1,1,0"
+                                        BorderBrush="Transparent"
+                                        Background="Transparent"
+                                        MouseLeftButtonDown="TabReiter_Click"
+                                        Tag="{Binding}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ui:SymbolIcon x:Name="TabSymbol" Symbol="DocumentPdf24" FontSize="16"
+                                                       Margin="0,0,8,0" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock x:Name="TabTitelText"
+                                                   Text="{Binding TabTitel}"
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   MaxWidth="200"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding ViewModel.Pfad}" />
+                                        <Ellipse x:Name="GeändertZeichen"
+                                                 Width="7" Height="7" Margin="8,0,0,0"
+                                                 VerticalAlignment="Center"
+                                                 Fill="{DynamicResource PpOrange}"
+                                                 ToolTip="Ungespeicherte Änderungen"
+                                                 Visibility="{Binding ViewModel.IstGeändert,
+                                                     Converter={StaticResource BoolZuSichtbar}}" />
+                                        <Button Style="{StaticResource SymbolKnopf}"
+                                                Width="24" Height="24" Margin="4,0,0,0"
+                                                ToolTip="Tab schließen"
+                                                Click="TabSchließen_Click"
+                                                Tag="{Binding}">
+                                            <ui:SymbolIcon Symbol="Dismiss16" FontSize="12" />
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Style="{StaticResource SymbolKnopf}" Width="28" Height="28"
+                            Margin="4,0,0,4" VerticalAlignment="Bottom"
+                            Click="ÖffnenInNeuemTab_Click" ToolTip="PDF öffnen">
+                        <ui:SymbolIcon Symbol="Add20" FontSize="16" />
+                    </Button>
+                </StackPanel>
+            </ui:TitleBar.Header>
+            <ui:TitleBar.TrailingContent>
+                <!-- Suchfeld-Optik: öffnet das schwebende Suchfeld (Strg+F). -->
+                <Button Width="260" Height="30" Margin="0,0,12,0" VerticalAlignment="Center"
+                        IsEnabled="{Binding HatDokument}" Click="SuchenÖffnen_Click"
+                        ToolTip="Im Dokument suchen (Strg+F)">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Feld" CornerRadius="4" Padding="10,0" BorderThickness="1,1,1,1"
+                                    Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <ui:SymbolIcon Symbol="Search20" FontSize="16" Margin="0,0,8,0"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="Im Dokument suchen  (Strg+F)" FontSize="12"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Feld" Property="BorderBrush" Value="{DynamicResource PpTeal200}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Feld" Property="Opacity" Value="0.5" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </ui:TitleBar.TrailingContent>
+        </ui:TitleBar>
+
+        <!-- Menüband (Ribbon): Registerkarten, rechts dauerhaft Drucken + Speichern -->
+        <Border Grid.Row="1" BorderThickness="0,1,0,1"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Bottom" Margin="0,0,12,20">
+                    <Button Style="{StaticResource SymbolKnopf}" Width="36" Height="36" Margin="0,0,4,0"
+                            Command="{Binding DruckenBefehl}" ToolTip="Drucken (Strg+P)">
+                        <ui:SymbolIcon Symbol="Print20" FontSize="20" />
+                    </Button>
+                    <Button Style="{StaticResource SpeichernKnopf}"
+                            Command="{Binding SpeichernBefehl}" ToolTip="Dokument speichern">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Save20" FontSize="18" Margin="0,0,8,0" />
+                            <TextBlock Text="Speichern" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
-                <TabControl Grid.Column="1" BorderThickness="0" Background="Transparent"
-                            Padding="0">
+                <TabControl Grid.Column="0" ItemContainerStyle="{StaticResource MenübandReiter}">
+                    <TabControl.Template>
+                        <ControlTemplate TargetType="TabControl">
+                            <DockPanel>
+                                <TabPanel DockPanel.Dock="Top" IsItemsHost="True" Margin="8,0,0,0" />
+                                <ContentPresenter ContentSource="SelectedContent" />
+                            </DockPanel>
+                        </ControlTemplate>
+                    </TabControl.Template>
 
                     <!-- ===== Start: Datei ===== -->
                     <TabItem Header="Start">
-                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                        <StackPanel Orientation="Horizontal" Margin="4,2,4,6">
                             <Border Style="{StaticResource MenübandGruppe}" BorderThickness="0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Bottom" Text="Datei"
@@ -140,7 +383,7 @@
                                                 <TextBlock Text="Öffnen" Style="{StaticResource MenübandKnopfText}" />
                                             </StackPanel>
                                         </Button>
-                                        <Button Style="{StaticResource MenübandSpeichern}"
+                                        <Button Style="{StaticResource MenübandKnopf}"
                                                 Command="{Binding SpeichernBefehl}" ToolTip="Dokument speichern">
                                             <StackPanel>
                                                 <ui:SymbolIcon Symbol="Save28" FontSize="22" HorizontalAlignment="Center" />
@@ -169,7 +412,7 @@
 
                     <!-- ===== Seiten: Bearbeiten + Dokument ===== -->
                     <TabItem Header="Seiten">
-                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                        <StackPanel Orientation="Horizontal" Margin="4,2,4,6">
                             <Border Style="{StaticResource MenübandGruppe}">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Bottom" Text="Seiten"
@@ -236,7 +479,7 @@
 
                     <!-- ===== Anmerken: Einfügen, Stift, Unterschrift ===== -->
                     <TabItem Header="Anmerken">
-                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                        <StackPanel Orientation="Horizontal" Margin="4,2,4,6">
                             <Border Style="{StaticResource MenübandGruppe}">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Bottom" Text="Einfügen"
@@ -257,7 +500,8 @@
                                                 <TextBlock Text="Bild einfügen" Style="{StaticResource MenübandKnopfText}" />
                                             </StackPanel>
                                         </Button>
-                                        <ui:DropDownButton Margin="2,0" Padding="8,6" VerticalAlignment="Stretch"
+                                        <ui:DropDownButton Margin="1,0" Padding="8,6" VerticalAlignment="Stretch"
+                                                           Background="Transparent" BorderBrush="Transparent"
                                                            IsEnabled="{Binding HatDokument}"
                                                            ToolTip="Kreuz, Häkchen, Punkt, Umrandung oder Durchstreichung einfügen">
                                             <ui:DropDownButton.Content>
@@ -329,8 +573,8 @@
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Bottom" Text="Unterschrift"
                                                Style="{StaticResource MenübandGruppenTitel}" />
-                                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                        <ComboBox MinWidth="180" Margin="2,2,2,6"
+                                    <StackPanel Orientation="Horizontal">
+                                        <ComboBox MinWidth="170" Height="46" Margin="2,0,6,0" VerticalAlignment="Center"
                                                   ItemsSource="{Binding Unterschriften}"
                                                   SelectedItem="{Binding ZuEinfügendeUnterschrift, Mode=TwoWay}"
                                                   ToolTip="Gespeicherte Unterschrift auswählen – wird sofort eingefügt">
@@ -345,9 +589,14 @@
                                                 </DataTemplate>
                                             </ComboBox.ItemTemplate>
                                         </ComboBox>
-                                        <ui:Button Content="Unterschrift importieren" Icon="{ui:SymbolIcon Signature24}"
-                                                   Margin="2,0" HorizontalAlignment="Stretch"
-                                                   Command="{Binding UnterschriftHinzufügenBefehl}" />
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding UnterschriftHinzufügenBefehl}"
+                                                ToolTip="Unterschrift als Bild importieren">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Signature24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Importieren" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
                                     </StackPanel>
                                 </DockPanel>
                             </Border>
@@ -356,13 +605,14 @@
 
                     <!-- ===== Formular ===== -->
                     <TabItem Header="Formular">
-                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                        <StackPanel Orientation="Horizontal" Margin="4,2,4,6">
                             <Border Style="{StaticResource MenübandGruppe}" BorderThickness="0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Bottom" Text="Formularfelder"
                                                Style="{StaticResource MenübandGruppenTitel}" />
                                     <StackPanel Orientation="Horizontal">
-                                        <ui:DropDownButton Margin="2,0" Padding="8,6" VerticalAlignment="Stretch"
+                                        <ui:DropDownButton Margin="1,0" Padding="8,6" VerticalAlignment="Stretch"
+                                                           Background="Transparent" BorderBrush="Transparent"
                                                            IsEnabled="{Binding HatDokument}"
                                                            ToolTip="Ausfüllbares Formularfeld anlegen, dann auf die Seite klicken">
                                             <ui:DropDownButton.Content>
@@ -403,7 +653,7 @@
 
                     <!-- ===== Ansicht: Zoom, Anzeige, Info ===== -->
                     <TabItem Header="Ansicht">
-                        <StackPanel Orientation="Horizontal" Margin="6,4">
+                        <StackPanel Orientation="Horizontal" Margin="4,2,4,6">
                             <Border Style="{StaticResource MenübandGruppe}">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Bottom" Text="Zoom"
@@ -441,6 +691,14 @@
                                                 <TextBlock Text="Kommentare" Style="{StaticResource MenübandKnopfText}" />
                                             </StackPanel>
                                         </ToggleButton>
+                                        <ToggleButton x:Name="DunkelUmschalter" Style="{StaticResource MenübandUmschalter}"
+                                                      Click="DesignUmschalten_Click"
+                                                      ToolTip="Zwischen hellem und dunklem Design wechseln">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="WeatherMoon24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Dunkel" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </ToggleButton>
                                     </StackPanel>
                                 </DockPanel>
                             </Border>
@@ -463,71 +721,6 @@
                     </TabItem>
                 </TabControl>
             </Grid>
-        </Border>
-
-        <!-- Tab-Leiste -->
-        <Border Grid.Row="2" BorderThickness="0,0,0,1"
-                BorderBrush="{DynamicResource ControlElevationBorderBrush}"
-                Background="{DynamicResource ApplicationBackgroundBrush}"
-                Padding="4,2,4,0">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Hidden">
-                <ItemsControl x:Name="TabLeiste">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type local:DokumentTab}">
-                            <Border x:Name="TabRahmen"
-                                    Margin="1,2,1,0"
-                                    Padding="10,4,4,4"
-                                    CornerRadius="4,4,0,0"
-                                    BorderThickness="1,1,1,0"
-                                    BorderBrush="{DynamicResource ControlElevationBorderBrush}"
-                                    Background="{DynamicResource ControlFillColorDefaultBrush}"
-                                    Cursor="Hand"
-                                    MouseLeftButtonDown="TabReiter_Click"
-                                    Tag="{Binding}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock x:Name="TabTitelText"
-                                               Text="{Binding TabTitel}"
-                                               VerticalAlignment="Center"
-                                               MaxWidth="200"
-                                               TextTrimming="CharacterEllipsis"
-                                               ToolTip="{Binding ViewModel.Pfad}" />
-                                    <TextBlock x:Name="GeändertZeichen"
-                                               Text="●"
-                                               Margin="5,0,0,0"
-                                               VerticalAlignment="Center"
-                                               FontSize="16"
-                                               FontWeight="Bold"
-                                               Foreground="#F4A93B"
-                                               ToolTip="Ungespeicherte Änderungen"
-                                               Visibility="{Binding ViewModel.IstGeändert,
-                                                   Converter={StaticResource BoolZuSichtbar}}" />
-                                    <Button Content="✕"
-                                            Width="18" Height="18"
-                                            FontSize="9"
-                                            Padding="0"
-                                            Margin="6,0,0,0"
-                                            VerticalAlignment="Center"
-                                            ToolTip="Tab schließen"
-                                            Click="TabSchließen_Click"
-                                            Tag="{Binding}" />
-                                </StackPanel>
-                            </Border>
-                            <DataTemplate.Triggers>
-                                <!-- Geänderten Tab zusätzlich durch fetten Titel hervorheben. -->
-                                <DataTrigger Binding="{Binding ViewModel.IstGeändert}" Value="True">
-                                    <Setter TargetName="TabTitelText" Property="FontWeight" Value="SemiBold" />
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
         </Border>
 
         <!-- Schwebendes Suchfeld (Strg+F / Suchen-Schaltfläche) -->
@@ -564,6 +757,26 @@
             </StackPanel>
         </Border>
 
+        <!-- Modus-Hinweis: nur während „Felder bearbeiten“ -->
+        <Border Grid.Row="2" Padding="16,8,12,8" BorderThickness="0,0,0,1"
+                Background="{DynamicResource PpTeal50}" BorderBrush="{DynamicResource PpTeal200}"
+                Visibility="{Binding FelderBearbeitenModus, Converter={StaticResource BoolZuSichtbar}}">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Fertig" Height="30" Padding="14,0" FontSize="12"
+                        Click="FelderBearbeitenFertig_Click"
+                        ToolTip="Modus beenden – Änderungen werden eingebacken" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:SymbolIcon Symbol="Edit24" FontSize="18" Margin="0,0,10,0"
+                                   Foreground="{DynamicResource PpAkzent}" />
+                    <TextBlock Text="Felder bearbeiten" FontSize="13" FontWeight="SemiBold"
+                               Margin="0,0,10,0" VerticalAlignment="Center" />
+                    <TextBlock FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               Text="Feld anklicken zum Ändern, ✕ zum Löschen. Esc beendet den Modus – Änderungen werden dann eingebacken." />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
         <!-- Hauptbereich: Miniaturen | Seitenansicht | Kommentar-Seitenleiste -->
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
@@ -584,17 +797,14 @@
                 <!-- Toggle-Leiste: nur sichtbar wenn TOC vorhanden -->
                 <Border Grid.Row="0"
                         Visibility="{Binding HatInhaltsverzeichnis, Converter={StaticResource BoolZuSichtbar}}"
-                        BorderBrush="{DynamicResource ControlElevationBorderBrush}"
-                        BorderThickness="0,0,0,1"
-                        Padding="4,4,4,3">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="Seiten"
-                                     IsChecked="{Binding ZeigeInhaltsverzeichnis, Converter={StaticResource InvertBool}, Mode=TwoWay}"
-                                     Padding="8,4" Margin="2,0" VerticalAlignment="Center" />
-                        <RadioButton Content="Inhalt"
-                                     IsChecked="{Binding ZeigeInhaltsverzeichnis, Mode=TwoWay}"
-                                     Padding="8,4" Margin="2,0" VerticalAlignment="Center" />
-                    </StackPanel>
+                        Margin="12,12,12,8" Padding="2" CornerRadius="6"
+                        Background="{DynamicResource ControlStrokeColorDefaultBrush}">
+                    <UniformGrid Columns="2">
+                        <RadioButton Content="Seiten" Style="{StaticResource Segment}"
+                                     IsChecked="{Binding ZeigeInhaltsverzeichnis, Converter={StaticResource InvertBool}, Mode=TwoWay}" />
+                        <RadioButton Content="Inhalt" Style="{StaticResource Segment}"
+                                     IsChecked="{Binding ZeigeInhaltsverzeichnis, Mode=TwoWay}" />
+                    </UniformGrid>
                 </Border>
 
                 <!-- Thumbnails (sichtbar wenn ZeigeInhaltsverzeichnis = false) -->
@@ -618,7 +828,22 @@
                          dd:DragDrop.IsDragSource="True"
                          dd:DragDrop.IsDropTarget="True"
                          dd:DragDrop.MinimumHorizontalDragDistance="18"
-                         dd:DragDrop.MinimumVerticalDragDistance="18">
+                         dd:DragDrop.MinimumVerticalDragDistance="18"
+                         Background="Transparent" BorderThickness="0">
+                    <!-- Eigener Container: keine Fluent-Zeilenhervorhebung; die Auswahl
+                         zeigt der Teal-Rahmen um die Miniatur (DataTemplate). -->
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter Margin="0,4" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type m:SeitenElement}">
                             <Grid x:Name="Kachel" Margin="4" Background="Transparent">
@@ -637,12 +862,15 @@
                                      Klick hier nur auswählt und kein Verschieben startet. -->
                                 <StackPanel HorizontalAlignment="Center"
                                             dd:DragDrop.DragSourceIgnore="True">
-                                    <Border BorderBrush="{DynamicResource ControlElevationBorderBrush}"
-                                            BorderThickness="1" Background="White" Padding="2">
-                                        <Image Source="{Binding Vorschau}" Stretch="Uniform" MaxHeight="200" />
+                                    <Border x:Name="AuswahlRahmen" Padding="3" CornerRadius="6"
+                                            BorderThickness="2" BorderBrush="Transparent" Background="Transparent">
+                                        <Border BorderBrush="#14000000" BorderThickness="1" Background="White">
+                                            <Image Source="{Binding Vorschau}" Stretch="Uniform" MaxHeight="200" />
+                                        </Border>
                                     </Border>
-                                    <TextBlock Text="{Binding Nummer}" HorizontalAlignment="Center"
-                                               Margin="0,4,0,0" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="SeitenNr" Text="{Binding Nummer}" HorizontalAlignment="Center"
+                                               Margin="0,6,0,0" FontSize="12"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </StackPanel>
                                 <!-- Ziehgriff: nur hier beginnt das Umsortieren. Erscheint
                                      dezent beim Überfahren der Kachel. -->
@@ -650,9 +878,9 @@
                                         HorizontalAlignment="Right" VerticalAlignment="Top"
                                         Margin="0,4,4,0" Padding="6,2"
                                         CornerRadius="4" Opacity="0"
-                                        Background="#0E7C7B" Cursor="SizeAll"
+                                        Background="{DynamicResource PpAkzent}" Cursor="SizeAll"
                                         ToolTip="Ziehen, um die Seitenreihenfolge zu ändern">
-                                    <TextBlock Text="⠿⠿" Foreground="White" FontSize="11"
+                                    <TextBlock Text="⠿⠿" Foreground="{DynamicResource PpAufAkzent}" FontSize="11"
                                                FontWeight="Bold" />
                                 </Border>
                             </Grid>
@@ -660,6 +888,12 @@
                                 <Trigger SourceName="Kachel" Property="IsMouseOver" Value="True">
                                     <Setter TargetName="Ziehgriff" Property="Opacity" Value="0.95" />
                                 </Trigger>
+                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                    <Setter TargetName="AuswahlRahmen" Property="BorderBrush" Value="{DynamicResource PpAkzent}" />
+                                    <Setter TargetName="AuswahlRahmen" Property="Background" Value="{DynamicResource PpTeal50}" />
+                                    <Setter TargetName="SeitenNr" Property="Foreground" Value="{DynamicResource PpAkzent}" />
+                                    <Setter TargetName="SeitenNr" Property="FontWeight" Value="SemiBold" />
+                                </DataTrigger>
                             </DataTemplate.Triggers>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -720,16 +954,122 @@
                           Background="Transparent" />
 
             <!-- Große Ansicht der aktuellen Seite mit Overlay -->
-            <Border Grid.Column="2" Background="{DynamicResource ApplicationBackgroundBrush}">
+            <Grid Grid.Column="2" Background="{DynamicResource PpLeinwand}">
+                <!-- Unten zusätzlicher Abstand, damit die schwebende Zoomleiste die Seite nicht verdeckt. -->
                 <ScrollViewer x:Name="SeitenScroll" HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto" Padding="16">
+                              VerticalScrollBarVisibility="Auto" Padding="24,24,24,72">
                     <Grid x:Name="SeitenHost" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image x:Name="SeitenBild" Stretch="Fill"
                                RenderOptions.BitmapScalingMode="HighQuality" />
                         <Canvas x:Name="OverlayCanvas" Background="Transparent" />
                     </Grid>
                 </ScrollViewer>
-            </Border>
+
+                <!-- Schwebende Zoomleiste -->
+                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"
+                        Padding="4" CornerRadius="6" BorderThickness="1"
+                        Background="{DynamicResource PpFläche}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding HatDokument}" Value="True" />
+                                        <Condition Binding="{Binding FelderBearbeitenModus}" Value="False" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource SymbolKnopf}" Command="{Binding ZoomMinusBefehl}" ToolTip="Verkleinern">
+                            <ui:SymbolIcon Symbol="ZoomOut20" FontSize="18" />
+                        </Button>
+                        <TextBlock Text="{Binding ZoomText}" MinWidth="48" FontSize="12"
+                                   TextAlignment="Center" VerticalAlignment="Center" />
+                        <Button Style="{StaticResource SymbolKnopf}" Command="{Binding ZoomPlusBefehl}" ToolTip="Vergrößern">
+                            <ui:SymbolIcon Symbol="ZoomIn20" FontSize="18" />
+                        </Button>
+                        <Rectangle Width="1" Height="18" Margin="4,0" Fill="{DynamicResource PpHaarlinie}" />
+                        <TextBlock Text="{Binding SeitenStatus}" FontSize="12" Margin="8,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Legende während „Felder bearbeiten“ -->
+                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16"
+                        Padding="12,6" CornerRadius="6" BorderThickness="1"
+                        Background="{DynamicResource PpFläche}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                        Visibility="{Binding FelderBearbeitenModus, Converter={StaticResource BoolZuSichtbar}}">
+                    <StackPanel Orientation="Horizontal" TextElement.FontSize="12">
+                        <Border Width="16" Height="10" CornerRadius="2" BorderThickness="1" Margin="0,0,6,0"
+                                BorderBrush="{DynamicResource PpAkzent}" Background="#2815A39A" />
+                        <TextBlock Text="Vorhandenes Feld" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <Rectangle Width="16" Height="10" RadiusX="2" RadiusY="2" Margin="0,0,6,0"
+                                   Stroke="{DynamicResource PpAkzent}" StrokeThickness="1.5" StrokeDashArray="2 1.5"
+                                   Fill="#2815A39A" />
+                        <TextBlock Text="Entwurf (noch nicht eingebacken)" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Startzustand: kein Dokument geöffnet -->
+                <Grid Background="{DynamicResource PpLeinwand}"
+                      Visibility="{Binding HatDokument, Converter={StaticResource InvertBoolZuSichtbar}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16,32">
+                        <Grid MaxWidth="600" MinWidth="420">
+                            <Rectangle RadiusX="8" RadiusY="8" Fill="{DynamicResource PpFläche}"
+                                       Stroke="{DynamicResource PpTeal500}" StrokeThickness="2" StrokeDashArray="4 3" />
+                            <StackPanel Margin="32,48" HorizontalAlignment="Center">
+                                <Border Width="72" Height="72" CornerRadius="36" BorderThickness="1"
+                                        Background="{DynamicResource PpTeal50}" BorderBrush="{DynamicResource PpTeal200}">
+                                    <ui:SymbolIcon Symbol="DocumentPdf32" FontSize="36"
+                                                   Foreground="{DynamicResource PpAkzent}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="PDF hierher ziehen" Margin="0,16,0,4" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PpAkzent}" HorizontalAlignment="Center" />
+                                <TextBlock Text="oder eine Datei auswählen. Mehrere PDFs öffnen sich als Tabs."
+                                           FontSize="13" Foreground="{DynamicResource PpInk}"
+                                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+                                <Button Style="{StaticResource SpeichernKnopf}" Margin="0,20,0,0"
+                                        HorizontalAlignment="Center" Click="ÖffnenInNeuemTab_Click"
+                                        Background="{DynamicResource PpAkzent}" BorderBrush="{DynamicResource PpAkzentRand}"
+                                        Foreground="{DynamicResource PpAufAkzent}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Open28" FontSize="18" Margin="0,0,8,0" />
+                                        <TextBlock Text="PDF öffnen" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0">
+                            <StackPanel.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontSize" Value="11" />
+                                    <Setter Property="Foreground" Value="{DynamicResource PpInk}" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <Border Style="{StaticResource Taste}"><TextBlock Text="Strg" /></Border>
+                            <Border Style="{StaticResource Taste}"><TextBlock Text="F" /></Border>
+                            <TextBlock Text="Suchen" FontSize="12" Margin="2,0,24,0" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <Border Style="{StaticResource Taste}"><TextBlock Text="Strg" /></Border>
+                            <Border Style="{StaticResource Taste}"><TextBlock Text="V" /></Border>
+                            <TextBlock Text="Bild einfügen" FontSize="12" Margin="2,0,24,0" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <Border Style="{StaticResource Taste}"><TextBlock Text="Strg" /></Border>
+                            <Border Style="{StaticResource Taste}"><TextBlock Text="P" /></Border>
+                            <TextBlock Text="Drucken" FontSize="12" Margin="2,0,0,0" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <TextBlock Text="Kostenlos, ohne Konto, ohne Werbung." Margin="0,12,0,0" FontSize="12"
+                                   Foreground="{DynamicResource PpGedämpft}" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
 
             <!-- Kommentar-Seitenleiste -->
             <Border Grid.Column="3" Width="320"
@@ -737,32 +1077,25 @@
                     Background="{DynamicResource ApplicationBackgroundBrush}"
                     BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1,0,0,0">
                 <Border.Resources>
-                    <Style x:Key="StatusKnopf" TargetType="Button">
-                        <Setter Property="Width" Value="34" />
-                        <Setter Property="Height" Value="26" />
-                        <Setter Property="Margin" Value="0,0,6,0" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="FontWeight" Value="Bold" />
-                    </Style>
-                    <Style x:Key="ErledigtKnopf" TargetType="Button" BasedOn="{StaticResource StatusKnopf}">
-                        <Setter Property="Foreground" Value="#1B8A4B" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#1B8A4B" />
+                    <Style x:Key="ErledigtKnopf" TargetType="Button" BasedOn="{StaticResource SymbolKnopf}">
+                        <Setter Property="Width" Value="28" />
+                        <Setter Property="Height" Value="28" />
+                        <Setter Property="Foreground" Value="{DynamicResource PpAkzent}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IstErledigt}" Value="True">
-                                <Setter Property="Background" Value="#1B8A4B" />
-                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="Background" Value="{DynamicResource PpTeal100}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource PpTeal200}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                    <Style x:Key="AbgelehntKnopf" TargetType="Button" BasedOn="{StaticResource StatusKnopf}">
-                        <Setter Property="Foreground" Value="#C42B1C" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#C42B1C" />
+                    <Style x:Key="AbgelehntKnopf" TargetType="Button" BasedOn="{StaticResource SymbolKnopf}">
+                        <Setter Property="Width" Value="28" />
+                        <Setter Property="Height" Value="28" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IstAbgelehnt}" Value="True">
-                                <Setter Property="Background" Value="#C42B1C" />
-                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="Background" Value="{DynamicResource PpAbgelehntGrund}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource PpAbgelehntRand}" />
+                                <Setter Property="Foreground" Value="{DynamicResource PpAbgelehnt}" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -770,19 +1103,27 @@
 
                 <DockPanel>
                     <!-- Kopfzeile -->
-                    <Grid DockPanel.Dock="Top" Margin="10,8">
-                        <TextBlock Text="Kommentare" FontWeight="SemiBold" FontSize="14"
-                                   VerticalAlignment="Center" />
-                        <Button Content="✕" Width="24" Height="24" Padding="0"
-                                HorizontalAlignment="Right" Click="KommentareSchließen_Click"
-                                ToolTip="Seitenleiste schließen" />
+                    <Grid DockPanel.Dock="Top" Margin="16,12,8,10">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Kommentare" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center" />
+                            <Border Margin="8,0,0,0" MinWidth="20" Height="18" Padding="6,0" CornerRadius="9"
+                                    Background="{DynamicResource PpTeal100}" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Kommentare.Count}" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PpAkzent}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+                        <Button Style="{StaticResource SymbolKnopf}" HorizontalAlignment="Right"
+                                Click="KommentareSchließen_Click" ToolTip="Seitenleiste schließen">
+                            <ui:SymbolIcon Symbol="Dismiss16" FontSize="16" />
+                        </Button>
                     </Grid>
 
                     <!-- Eingabefeld für neuen Kommentar -->
                     <Border DockPanel.Dock="Top" Margin="10,0,10,8" Padding="8" CornerRadius="6"
                             Visibility="{Binding HatEntwurf, Converter={StaticResource BoolZuSichtbar}}"
                             Background="{DynamicResource ControlFillColorDefaultBrush}"
-                            BorderBrush="#15A39A" BorderThickness="1">
+                            BorderBrush="{DynamicResource PpTeal500}" BorderThickness="1">
                         <StackPanel>
                             <TextBlock Text="{Binding Entwurf.Kopfzeile}" FontSize="11" Margin="0,0,0,4"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
@@ -823,9 +1164,9 @@
                              ScrollViewer.ScrollChanged="KommentarListe_ScrollChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type m:Kommentar}">
-                                <Border Margin="2" Padding="8" CornerRadius="6"
-                                        Background="{DynamicResource ControlFillColorDefaultBrush}"
-                                        BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                <Border Margin="4,0,4,8" Padding="12" CornerRadius="6"
+                                        Background="{DynamicResource PpFläche}"
+                                        BorderBrush="{DynamicResource PpHaarlinie}"
                                         BorderThickness="1">
                                     <StackPanel>
                                         <Grid>
@@ -835,16 +1176,22 @@
                                                 <TextBlock Text="{Binding SeitenText}" FontSize="10.5"
                                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             </StackPanel>
-                                            <Button Content="🗑" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                                    Width="28" Height="24" Padding="0"
-                                                    Click="KommentarLöschen_Click" ToolTip="Kommentar löschen" />
+                                            <Button Style="{StaticResource SymbolKnopf}" Width="28" Height="28"
+                                                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                    Click="KommentarLöschen_Click" ToolTip="Kommentar löschen">
+                                                <ui:SymbolIcon Symbol="Delete20" FontSize="16" />
+                                            </Button>
                                         </Grid>
                                         <TextBlock Text="{Binding Inhalt}" TextWrapping="Wrap" Margin="0,6,0,8" />
                                         <StackPanel Orientation="Horizontal">
-                                            <Button Content="✓" Style="{StaticResource ErledigtKnopf}"
-                                                    Click="Erledigt_Click" ToolTip="Als erledigt markieren" />
-                                            <Button Content="✕" Style="{StaticResource AbgelehntKnopf}"
-                                                    Click="Abgelehnt_Click" ToolTip="Als abgelehnt markieren" />
+                                            <Button Style="{StaticResource ErledigtKnopf}" Margin="0,0,4,0"
+                                                    Click="Erledigt_Click" ToolTip="Als erledigt markieren">
+                                                <ui:SymbolIcon Symbol="CheckmarkCircle24" FontSize="18" />
+                                            </Button>
+                                            <Button Style="{StaticResource AbgelehntKnopf}"
+                                                    Click="Abgelehnt_Click" ToolTip="Als abgelehnt markieren">
+                                                <ui:SymbolIcon Symbol="DismissCircle24" FontSize="18" />
+                                            </Button>
                                         </StackPanel>
 
                                         <!-- Antworten (auch aus anderen Programmen) -->
@@ -852,9 +1199,9 @@
                                                       Visibility="{Binding HatAntworten, Converter={StaticResource BoolZuSichtbar}}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="{x:Type m:KommentarAntwort}">
-                                                    <Border Margin="0,0,0,4" Padding="6" CornerRadius="4"
-                                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
-                                                            BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                                                    <Border Margin="0,0,0,4" Padding="8,6" CornerRadius="4"
+                                                            Background="{DynamicResource PpTeal50}"
+                                                            BorderBrush="{DynamicResource PpTeal200}"
                                                             BorderThickness="1">
                                                         <StackPanel>
                                                             <TextBlock Text="{Binding Kopfzeile}" FontSize="10.5"
@@ -883,90 +1230,179 @@
                 </DockPanel>
             </Border>
 
-            <!-- Formularfeld-Eigenschaften (Formular-Designer) -->
-            <Border Grid.Column="4" Width="300"
+            <!-- Formularfeld-Eigenschaften (Formular-Designer): Kopf, Abschnitte Allgemein /
+                 Eingabe / Darstellung, unten „Feld löschen“. -->
+            <Border Grid.Column="4" Width="320"
                     Visibility="{Binding HatAusgewähltesFeld, Converter={StaticResource BoolZuSichtbar}}"
                     Background="{DynamicResource ApplicationBackgroundBrush}"
-                    BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1,0,0,0">
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1,0,0,0">
+                <Border.Resources>
+                    <Style x:Key="Feldbeschriftung" TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="12" />
+                        <Setter Property="Margin" Value="0,0,0,4" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Style>
+                    <Style x:Key="Abschnitt" TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="11" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="Margin" Value="0,0,0,12" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Style>
+                    <Style x:Key="Trenner" TargetType="Rectangle">
+                        <Setter Property="Height" Value="1" />
+                        <Setter Property="Margin" Value="0,20" />
+                        <Setter Property="Fill" Value="{DynamicResource PpHaarlinie}" />
+                    </Style>
+                    <Style x:Key="Farbmuster" TargetType="Border">
+                        <Setter Property="Width" Value="14" />
+                        <Setter Property="Height" Value="14" />
+                        <Setter Property="CornerRadius" Value="3" />
+                        <Setter Property="Margin" Value="0,0,6,0" />
+                        <Setter Property="BorderThickness" Value="1" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource PpGedämpft}" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                    </Style>
+                </Border.Resources>
                 <DockPanel>
-                    <Grid DockPanel.Dock="Top" Margin="12,10,8,6">
-                        <TextBlock Text="Feld-Eigenschaften" FontWeight="SemiBold" FontSize="14"
-                                   VerticalAlignment="Center" />
-                        <Button Content="✕" Width="26" Height="26" Padding="0" HorizontalAlignment="Right"
-                                Click="FeldAuswahlSchließen_Click" ToolTip="Auswahl aufheben" />
-                    </Grid>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="12,4,12,12">
-                            <TextBlock Text="Feldname" Margin="0,6,0,2" />
-                            <TextBox Text="{Binding AusgewähltesFeld.FeldName, UpdateSourceTrigger=PropertyChanged}" />
+                    <!-- Kopf: Symbolkachel, Titel, Feldtyp -->
+                    <Border DockPanel.Dock="Top" Padding="16,12,8,12" BorderThickness="0,0,0,1"
+                            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+                        <DockPanel>
+                            <Border Width="32" Height="32" CornerRadius="6" BorderThickness="1" Margin="0,0,10,0"
+                                    Background="{DynamicResource PpTeal50}" BorderBrush="{DynamicResource PpTeal200}">
+                                <ui:SymbolIcon Symbol="TextField24" FontSize="18" Foreground="{DynamicResource PpAkzent}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource SymbolKnopf}"
+                                    Click="FeldAuswahlSchließen_Click" ToolTip="Auswahl aufheben">
+                                <ui:SymbolIcon Symbol="Dismiss16" FontSize="16" />
+                            </Button>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Feld-Eigenschaften" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding FeldTypText}" FontSize="12"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
 
-                            <TextBlock Text="Standardwert" Margin="0,10,0,2" />
+                    <!-- Fuß: Feld löschen -->
+                    <Border DockPanel.Dock="Bottom" Padding="16,12" BorderThickness="0,1,0,0"
+                            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+                        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Height="32"
+                                Click="FeldLöschen_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Delete20" FontSize="16" Margin="0,0,8,0" />
+                                <TextBlock Text="Feld löschen" FontSize="13" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Border>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="16">
+                            <!-- Allgemein -->
+                            <TextBlock Text="Allgemein" Style="{StaticResource Abschnitt}" />
+                            <TextBlock Text="Feldname" Style="{StaticResource Feldbeschriftung}" />
+                            <TextBox Text="{Binding AusgewähltesFeld.FeldName, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="Standardwert" Margin="0,12,0,4" Style="{StaticResource Feldbeschriftung}" />
                             <TextBox Text="{Binding AusgewähltesFeld.Standardwert, UpdateSourceTrigger=PropertyChanged}"
                                      ToolTip="Vorbelegung; bei Kontrollkästchen 'ja', bei Optionsfeld die vorgewählte Option" />
-
-                            <TextBlock Text="QuickInfo (Tooltip)" Margin="0,10,0,2" />
+                            <TextBlock Text="QuickInfo (Tooltip)" Margin="0,12,0,4" Style="{StaticResource Feldbeschriftung}" />
                             <TextBox Text="{Binding AusgewähltesFeld.QuickInfo, UpdateSourceTrigger=PropertyChanged}"
-                                     TextWrapping="Wrap" AcceptsReturn="True" MinHeight="40" />
+                                     TextWrapping="Wrap" AcceptsReturn="True" />
+                            <WrapPanel Margin="0,12,0,0">
+                                <CheckBox Content="Pflichtfeld" Margin="0,0,20,0"
+                                          IsChecked="{Binding AusgewähltesFeld.Pflichtfeld}" />
+                                <CheckBox Content="Schreibgeschützt"
+                                          IsChecked="{Binding AusgewähltesFeld.Schreibgeschützt}" />
+                            </WrapPanel>
 
-                            <CheckBox Content="Pflichtfeld" Margin="0,10,0,0"
-                                      IsChecked="{Binding AusgewähltesFeld.Pflichtfeld}" />
-                            <CheckBox Content="Schreibgeschützt" Margin="0,6,0,0"
-                                      IsChecked="{Binding AusgewähltesFeld.Schreibgeschützt}" />
+                            <!-- Eingabe (nur bei Optionen oder Texteigenschaften) -->
+                            <StackPanel Visibility="{Binding FeldHatEingabe, Converter={StaticResource BoolZuSichtbar}}">
+                                <Rectangle Style="{StaticResource Trenner}" />
+                                <TextBlock Text="Eingabe" Style="{StaticResource Abschnitt}" />
 
-                            <!-- Auswahlmöglichkeiten (Dropdown/Listenfeld/Optionsfeld) -->
-                            <StackPanel Visibility="{Binding FeldHatOptionen, Converter={StaticResource BoolZuSichtbar}}">
-                                <TextBlock Text="Optionen (eine je Zeile)" Margin="0,12,0,2" />
-                                <!-- Übernahme erst beim Verlassen des Feldes (LostFocus): Bei jedem
-                                     Tastendruck würde das Parsen samt Seiten-Neuzeichnen die Eingabe
-                                     ausbremsen und Enter/Leerzeichen hakelig machen. -->
-                                <TextBox Text="{Binding FeldOptionenText}"
-                                         AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80"
-                                         VerticalScrollBarVisibility="Auto"
-                                         ToolTip="Eine Option je Zeile – wird beim Verlassen des Feldes übernommen" />
+                                <!-- Auswahlmöglichkeiten (Dropdown/Listenfeld/Optionsfeld) -->
+                                <StackPanel Visibility="{Binding FeldHatOptionen, Converter={StaticResource BoolZuSichtbar}}">
+                                    <TextBlock Text="Optionen (eine je Zeile)" Style="{StaticResource Feldbeschriftung}" />
+                                    <!-- Übernahme erst beim Verlassen des Feldes (LostFocus): Bei jedem
+                                         Tastendruck würde das Parsen samt Seiten-Neuzeichnen die Eingabe
+                                         ausbremsen und Enter/Leerzeichen hakelig machen. -->
+                                    <TextBox Text="{Binding FeldOptionenText}"
+                                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80"
+                                             VerticalScrollBarVisibility="Auto"
+                                             ToolTip="Eine Option je Zeile – wird beim Verlassen des Feldes übernommen" />
+                                    <CheckBox Content="Mehrfachauswahl erlauben" Margin="0,8,0,0"
+                                              Visibility="{Binding FeldIstListenfeld, Converter={StaticResource BoolZuSichtbar}}"
+                                              IsChecked="{Binding AusgewähltesFeld.MehrfachAuswahl}" />
+                                </StackPanel>
+
+                                <!-- Textfeld-Eigenschaften -->
+                                <StackPanel Visibility="{Binding FeldIstText, Converter={StaticResource BoolZuSichtbar}}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Max. Zeichen" Style="{StaticResource Feldbeschriftung}" />
+                                            <!-- LostFocus: Der Setter meldet den normalisierten Wert zurück und
+                                                 würde die Eingabe sonst bei jedem Tastendruck überschreiben. -->
+                                            <TextBox Text="{Binding FeldMaxZeichenText}" ToolTip="Leer = unbegrenzt" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2"
+                                                    Visibility="{Binding FeldFormatRelevant, Converter={StaticResource BoolZuSichtbar}}">
+                                            <TextBlock Text="Format / Prüfung" Style="{StaticResource Feldbeschriftung}" />
+                                            <ComboBox ItemsSource="{Binding FormatWerte}"
+                                                      SelectedItem="{Binding AusgewähltesFeld.Format}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <CheckBox Content="Als Kästchen (gleichmäßige Felder)" Margin="0,12,0,0"
+                                              IsChecked="{Binding AusgewähltesFeld.AlsKästchen}"
+                                              ToolTip="Comb-Feld – benötigt eine maximale Zeichenanzahl" />
+                                </StackPanel>
                             </StackPanel>
 
-                            <!-- Mehrfachauswahl (nur Listenfeld) -->
-                            <CheckBox Content="Mehrfachauswahl erlauben" Margin="0,8,0,0"
-                                      Visibility="{Binding FeldIstListenfeld, Converter={StaticResource BoolZuSichtbar}}"
-                                      IsChecked="{Binding AusgewähltesFeld.MehrfachAuswahl}" />
-
-                            <!-- Textfeld-Eigenschaften -->
-                            <StackPanel Visibility="{Binding FeldIstText, Converter={StaticResource BoolZuSichtbar}}">
-                                <TextBlock Text="Maximale Zeichenanzahl" Margin="0,12,0,2" />
-                                <!-- LostFocus: Der Setter meldet den normalisierten Wert zurück und
-                                     würde die Eingabe sonst bei jedem Tastendruck überschreiben. -->
-                                <TextBox Text="{Binding FeldMaxZeichenText}"
-                                         ToolTip="Leer = unbegrenzt" />
-                                <CheckBox Content="Als Kästchen (gleichmäßige Felder)" Margin="0,8,0,0"
-                                          IsChecked="{Binding AusgewähltesFeld.AlsKästchen}"
-                                          ToolTip="Comb-Feld – benötigt eine maximale Zeichenanzahl" />
-                            </StackPanel>
-
-                            <!-- Format/Prüfung (nur einfaches Textfeld) -->
-                            <StackPanel Visibility="{Binding FeldFormatRelevant, Converter={StaticResource BoolZuSichtbar}}">
-                                <TextBlock Text="Format / Prüfung" Margin="0,12,0,2" />
-                                <ComboBox ItemsSource="{Binding FormatWerte}"
-                                          SelectedItem="{Binding AusgewähltesFeld.Format}" />
-                            </StackPanel>
-
-                            <TextBlock Text="Ausrichtung" Margin="0,12,0,2" />
-                            <ComboBox ItemsSource="{Binding AusrichtungWerte}"
-                                      SelectedItem="{Binding AusgewähltesFeld.Ausrichtung}" />
-
-                            <TextBlock Text="Schriftgröße (0 = automatisch)" Margin="0,10,0,2" />
+                            <!-- Darstellung -->
+                            <Rectangle Style="{StaticResource Trenner}" />
+                            <TextBlock Text="Darstellung" Style="{StaticResource Abschnitt}" />
+                            <TextBlock Text="Ausrichtung" Style="{StaticResource Feldbeschriftung}" />
+                            <Border Padding="2" CornerRadius="6"
+                                    Background="{DynamicResource ControlStrokeColorDefaultBrush}">
+                                <UniformGrid Columns="3">
+                                    <RadioButton Content="Links" Style="{StaticResource Segment}"
+                                                 IsChecked="{Binding AusgewähltesFeld.Ausrichtung, Converter={StaticResource EnumGleich}, ConverterParameter=Links}" />
+                                    <RadioButton Content="Mitte" Style="{StaticResource Segment}"
+                                                 IsChecked="{Binding AusgewähltesFeld.Ausrichtung, Converter={StaticResource EnumGleich}, ConverterParameter=Mitte}" />
+                                    <RadioButton Content="Rechts" Style="{StaticResource Segment}"
+                                                 IsChecked="{Binding AusgewähltesFeld.Ausrichtung, Converter={StaticResource EnumGleich}, ConverterParameter=Rechts}" />
+                                </UniformGrid>
+                            </Border>
+                            <TextBlock Text="Schriftgröße (0 = automatisch)" Margin="0,12,0,4" Style="{StaticResource Feldbeschriftung}" />
                             <TextBox Text="{Binding AusgewähltesFeld.Schriftgröße, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Text="Textfarbe (#RRGGBB)" Margin="0,10,0,2" />
-                            <TextBox Text="{Binding AusgewähltesFeld.TextFarbe, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <TextBlock Text="Rahmenfarbe (#RRGGBB, leer = keiner)" Margin="0,10,0,2" />
-                            <TextBox Text="{Binding AusgewähltesFeld.RahmenFarbe, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <TextBlock Text="Hintergrundfarbe (#RRGGBB, leer = keiner)" Margin="0,10,0,2" />
-                            <TextBox Text="{Binding AusgewähltesFeld.HintergrundFarbe, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <Button Content="Feld löschen" Margin="0,16,0,0" HorizontalAlignment="Left"
-                                    Click="FeldLöschen_Click" />
+                            <!-- Farben: #RRGGBB, leer = keine; das Muster zeigt die eingegebene Farbe -->
+                            <TextBlock Text="Textfarbe" Margin="0,12,0,4" Style="{StaticResource Feldbeschriftung}" />
+                            <DockPanel>
+                                <Border Style="{StaticResource Farbmuster}"
+                                        Background="{Binding AusgewähltesFeld.TextFarbe, FallbackValue=Transparent, TargetNullValue=Transparent}" />
+                                <TextBox Text="{Binding AusgewähltesFeld.TextFarbe, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="#RRGGBB" />
+                            </DockPanel>
+                            <TextBlock Text="Rahmenfarbe (leer = keiner)" Margin="0,12,0,4" Style="{StaticResource Feldbeschriftung}" />
+                            <DockPanel>
+                                <Border Style="{StaticResource Farbmuster}"
+                                        Background="{Binding AusgewähltesFeld.RahmenFarbe, FallbackValue=Transparent, TargetNullValue=Transparent}" />
+                                <TextBox Text="{Binding AusgewähltesFeld.RahmenFarbe, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="#RRGGBB, leer = kein Rahmen" />
+                            </DockPanel>
+                            <TextBlock Text="Hintergrundfarbe (leer = keiner)" Margin="0,12,0,4" Style="{StaticResource Feldbeschriftung}" />
+                            <DockPanel>
+                                <Border Style="{StaticResource Farbmuster}"
+                                        Background="{Binding AusgewähltesFeld.HintergrundFarbe, FallbackValue=Transparent, TargetNullValue=Transparent}" />
+                                <TextBox Text="{Binding AusgewähltesFeld.HintergrundFarbe, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="#RRGGBB, leer = kein Hintergrund" />
+                            </DockPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </DockPanel>
@@ -978,12 +1414,14 @@
         </Grid>
 
         <!-- Statusleiste -->
-        <Border Grid.Row="4" Padding="12,6" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+        <Border Grid.Row="4" Height="28" Padding="12,0" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                TextElement.FontSize="12"
+                TextElement.Foreground="{DynamicResource TextFillColorSecondaryBrush}">
             <Grid>
                 <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
                 <TextBlock Text="{Binding SpeicherHinweis}" HorizontalAlignment="Center"
-                           VerticalAlignment="Center" Foreground="#0E7C7B" FontWeight="SemiBold" />
+                           VerticalAlignment="Center" Foreground="{DynamicResource PpAkzent}" FontWeight="SemiBold" />
                 <TextBlock Text="{Binding SeitenStatus}" HorizontalAlignment="Right"
                            VerticalAlignment="Center" />
             </Grid>

@@ -162,7 +162,8 @@ public partial class MainWindow
         TabLeisteHervorheben();
     }
 
-    /// <summary>Hebt den aktiven Tab-Reiter visuell hervor (hellerer Hintergrund, Akzentrahmen).</summary>
+    /// <summary>Hebt den aktiven Tab-Reiter hervor: Fläche + Rahmen, fetter Titel, Teal-Symbol.
+    /// Inaktive Reiter liegen flach in der Titelleiste.</summary>
     private void TabLeisteHervorheben()
     {
         for (int i = 0; i < _tabs.Count; i++)
@@ -177,12 +178,22 @@ public partial class MainWindow
             if (border == null) continue;
 
             bool istAktiv = ReferenceEquals(_tabs[i], _aktiverTab);
+            Brush sekundär = (Brush)(TryFindResource("TextFillColorSecondaryBrush") ?? Brushes.Gray);
             border.Background = istAktiv
-                ? (Brush)(TryFindResource("ApplicationBackgroundBrush") ?? Brushes.White)
-                : (Brush)(TryFindResource("ControlFillColorDefaultBrush") ?? Brushes.LightGray);
+                ? (Brush)(TryFindResource("ControlFillColorDefaultBrush") ?? Brushes.White)
+                : Brushes.Transparent;
             border.BorderBrush = istAktiv
-                ? Akzent
-                : (Brush)(TryFindResource("ControlElevationBorderBrush") ?? Brushes.Gray);
+                ? (Brush)(TryFindResource("ControlStrokeColorDefaultBrush") ?? Brushes.LightGray)
+                : Brushes.Transparent;
+            if (FindVisualChild<TextBlock>(cp, "TabTitelText") is { } titel)
+            {
+                titel.FontWeight = istAktiv ? FontWeights.SemiBold : FontWeights.Normal;
+                titel.Foreground = istAktiv
+                    ? (Brush)(TryFindResource("TextFillColorPrimaryBrush") ?? Brushes.Black)
+                    : sekundär;
+            }
+            if (FindVisualChild<Wpf.Ui.Controls.SymbolIcon>(cp, "TabSymbol") is { } symbol)
+                symbol.Foreground = istAktiv ? (Brush)(TryFindResource("PpAkzent") ?? Akzent) : sekundär;
         }
     }
 

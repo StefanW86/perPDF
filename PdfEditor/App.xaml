@@ -8,6 +8,8 @@
                 <!-- Modernes Fluent-Design (WPF-UI), helles Farbschema -->
                 <ui:ThemesDictionary Theme="Light" />
                 <ui:ControlsDictionary />
+                <!-- perPDF-Farben; App.DesignAnwenden tauscht diese Datei gegen PerPdfDunkel.xaml. -->
+                <ResourceDictionary Source="Themes/PerPdfHell.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

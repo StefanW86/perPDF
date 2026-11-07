@@ -226,6 +226,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow, IDropTarget
     /// <summary>Stellt die zuletzt gespeicherte Fenstergröße/-position wieder her.</summary>
     private void FensterZustandWiederherstellen()
     {
+        DunkelUmschalter.IsChecked = App.IstDunkel;
+        App.DesignGeändert += DesignNachziehen;
+        Closed += (_, _) => App.DesignGeändert -= DesignNachziehen;
         var z = FensterEinstellungen.Laden();
         if (z is null || z.Breite < 200 || z.Höhe < 150)
             return;
@@ -280,7 +283,25 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow, IDropTarget
             z.Breite = Width;
             z.Höhe = Height;
         }
+        z.DunkelGewählt = App.GewähltesDesign;
         FensterEinstellungen.Speichern(z);
+    }
+
+    /// <summary>„Fertig“ im Modus-Hinweis: beendet „Felder bearbeiten“ (backt die Änderungen ein).</summary>
+    private void FelderBearbeitenFertig_Click(object sender, RoutedEventArgs e) =>
+        _vm.FelderBearbeitenModus = false;
+
+    /// <summary>Umschalter „Dunkel“ (Ansicht): wechselt das Design sofort und merkt es sich.</summary>
+    private void DesignUmschalten_Click(object sender, RoutedEventArgs e)
+    {
+        App.DesignWählen(DunkelUmschalter.IsChecked == true);
+    }
+
+    /// <summary>Nach jedem Designwechsel (auch live durch Windows): Umschalter und Reiterfarben nachziehen.</summary>
+    private void DesignNachziehen()
+    {
+        DunkelUmschalter.IsChecked = App.IstDunkel;
+        TabLeisteHervorheben(); // Reiterfarben werden im Code gesetzt, nicht per DynamicResource
     }
 
 }

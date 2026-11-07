@@ -73,7 +73,7 @@
                         <TextBlock Text="Aktuelles Dokument: " FontWeight="SemiBold" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding LinkeDateiname}"
                                    VerticalAlignment="Center"
-                                   Foreground="#0E7C7B"
+                                   Foreground="{DynamicResource PpAkzent}"
                                    FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"
                                    MaxWidth="300" />
@@ -128,7 +128,7 @@
                         <TextBlock Text="Zweites Dokument: " FontWeight="SemiBold" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding RechteDateiname}"
                                    VerticalAlignment="Center"
-                                   Foreground="#0E7C7B"
+                                   Foreground="{DynamicResource PpAkzent}"
                                    FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"
                                    MaxWidth="300" />
@@ -139,7 +139,7 @@
                 <Border x:Name="DropZone"
                         DockPanel.Dock="Bottom"
                         Margin="20"
-                        BorderBrush="#15A39A"
+                        BorderBrush="{DynamicResource PpTeal500}"
                         BorderThickness="2"
                         CornerRadius="8"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
@@ -156,7 +156,7 @@
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock Text="📄" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12" />
                         <TextBlock Text="PDF hierher ziehen" FontSize="16" FontWeight="SemiBold"
-                                   HorizontalAlignment="Center" Foreground="#0E7C7B" />
+                                   HorizontalAlignment="Center" Foreground="{DynamicResource PpAkzent}" />
                         <TextBlock Text="oder 'Zweites Dokument öffnen' klicken"
                                    FontSize="12" HorizontalAlignment="Center"
                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
