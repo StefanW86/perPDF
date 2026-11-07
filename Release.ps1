@@ -9,7 +9,8 @@ param([string]$Version)
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
-function Git { git @args; if ($LASTEXITCODE -ne 0) { throw "git $args fehlgeschlagen" } }
+# git.exe statt git: PowerShell unterscheidet keine Groß-/Kleinschreibung, "git" riefe die Funktion selbst auf.
+function Git { git.exe @args; if ($LASTEXITCODE -ne 0) { throw "git $args fehlgeschlagen" } }
 
 if (Git status --porcelain) { throw "Arbeitsverzeichnis nicht sauber - erst committen." }
 if ((Git rev-parse --abbrev-ref HEAD) -ne 'main') { throw "Releases nur von main." }
