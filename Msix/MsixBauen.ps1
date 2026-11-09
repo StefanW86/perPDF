@@ -15,7 +15,7 @@ $inhalt = Join-Path $ausgabe 'Inhalt'
 
 # Self-contained veroeffentlichen: im MSIX-Paket gibt es keine installierte .NET-Runtime als Abhaengigkeit.
 # Eigene Output-/Intermediate-Pfade: der self-contained Build darf die Runtime nicht in den normalen
-# Ausgabeordner kopieren, aus dem das MSI per Wildcard alle Dateien uebernimmt.
+# Ausgabeordner kopieren.
 if (Test-Path $ausgabe) { Remove-Item $ausgabe -Recurse -Force }
 dotnet publish (Join-Path $wurzel 'PdfEditor\PdfEditor.csproj') -c Release --self-contained -o $inhalt `
     "-p:VersionVorgabe=$Version" '-p:OutputPath=bin/Msix/' '-p:IntermediateOutputPath=obj/Msix/'

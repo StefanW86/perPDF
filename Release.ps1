@@ -1,6 +1,6 @@
 # Erstellt ein Release - nur auf ausdruecklichen Wunsch ausfuehren.
 # Zaehlt die Version hoch (neues Git-Tag vX.Y.Z = einzige Versionsquelle) und pusht das Tag.
-# Der Release-Workflow (.github\workflows\release.yml) baut daraus EXE, MSI und MSIX mit genau
+# Der Release-Workflow (.github\workflows\release.yml) baut daraus EXE und MSIX mit genau
 # dieser Version und veroeffentlicht sie. Lokale Builds uebernehmen die Version ab dann ebenfalls.
 # Aufruf:  powershell -ExecutionPolicy Bypass -File Release.ps1 [-Version X.Y.Z]
 # Ohne -Version: mittlere Stelle des letzten Tags + 1 (v1.109.0 -> v1.110.0).
@@ -23,7 +23,7 @@ if (-not $Version) {
     $Version = "$($teile[0]).$([int]$teile[1] + 1).0"
 }
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw "Ungueltige Version '$Version' - erwartet X.Y.Z." }
-if ([version]$Version -le [version]$letztes) { throw "Version $Version ist nicht hoeher als das letzte Release $letztes (Store/MSI verlangen steigende Versionen)." }
+if ([version]$Version -le [version]$letztes) { throw "Version $Version ist nicht hoeher als das letzte Release $letztes (der Store verlangt steigende Versionen)." }
 
 # Vor dem Tag pruefen, dass der Stand baut.
 dotnet build (Join-Path $PSScriptRoot 'PdfEditor.sln') -c Release "-p:VersionVorgabe=$Version"

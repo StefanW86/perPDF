@@ -21,44 +21,17 @@ jobs:
           dotnet-version: "8.0.x"
 
       # Das Tag (vX.Y.Z) ist die Version des Releases: App-Anzeige, EXE-Dateiversion
-      # und MSI-Version werden daraus erzeugt, damit alle Stellen identisch sind.
-      # Setup gehoert nicht zum normalen Solution-Build (nur Releases) und wird hier explizit gebaut;
-      # danach das unsignierte Msix/bin/perPDF.msix (Store signiert beim Einreichen).
-      - name: MSI und MSIX bauen
+      # und MSIX-Paketversion werden daraus erzeugt, damit alle Stellen identisch sind.
+      # Ergebnis ist das unsignierte Msix/bin/perPDF.msix (der Store signiert beim Einreichen).
+      - name: MSIX bauen
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Tag '${{ github.ref_name }}' hat nicht das Format vX.Y.Z" }
-          dotnet build Setup/Setup.wixproj -c Release -p:VersionVorgabe=$version
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           ./Msix/MsixBauen.ps1 -Version $version
-
-      - name: MSI finden
-        id: msi
-        shell: pwsh
-        run: |
-          $msi = Get-ChildItem -Path Setup -Recurse -Filter "perPDF.msi" | Select-Object -First 1
-          if (-not $msi) { throw "perPDF.msi nicht gefunden" }
-          echo "path=$($msi.FullName)" >> $env:GITHUB_OUTPUT
 
       - name: Release veröffentlichen
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            ${{ steps.msi.outputs.path }}
-            Msix/bin/perPDF.msix
+          files: Msix/bin/perPDF.msix
           generate_release_notes: true
-
-      - name: Download-Ordner für GitHub Pages vorbereiten
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path pages-publish | Out-Null
-          Copy-Item "${{ steps.msi.outputs.path }}" "pages-publish/perPDF.msi"
-
-      - name: Auf GitHub Pages veröffentlichen (stabile Download-URL ohne Redirect)
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: pages-publish
-          publish_branch: gh-pages
-          keep_files: false

@@ -40,7 +40,7 @@
     <Resource Include="perpdf.ico" />
   </ItemGroup>
 
-  <!-- Pre-Build: BuildInfo.g.cs + Setup\Version.wxi aus dem Git-Tag erzeugen.
+  <!-- Pre-Build: BuildInfo.g.cs aus dem Git-Tag erzeugen.
        Release-Builds geben die Version per -p:VersionVorgabe=X.Y.Z (aus dem Tag) vor. -->
   <Target Name="VersionSchreiben" BeforeTargets="CoreCompile">
     <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\VersionSchreiben.ps1&quot; -ProjektVerzeichnis &quot;$(MSBuildProjectDirectory)&quot; -Version &quot;$(VersionVorgabe)&quot;" />

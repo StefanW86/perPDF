@@ -7,35 +7,43 @@ durchgehend auf Deutsch. Das Erscheinungsbild orientiert sich am grünen
 
 ## Funktionen
 
-- **Anzeigen** mehrseitiger PDFs mit Miniaturansicht und Zoom
-- **Seiten hinzufügen** (leere A4-Seite) und **Seiten aus anderen PDFs importieren**
-- **Seiten entfernen**
-- **Seiten drehen** (links/rechts in 90°-Schritten)
+**Dokumente & Seiten**
+- **Mehrere PDFs in Tabs** öffnen – per Dialog oder Drag-and-drop ins Fenster
+- Miniaturansicht, Inhaltsverzeichnis, **Zoom** (Symbolleiste oder **Strg + Mausrad**)
+- **Volltextsuche** im Dokument (**Strg+F**)
+- **Seiten hinzufügen, importieren, löschen** (auch per Seitenbereich, z. B. `3-10`)
+  und **drehen** (90°-Schritte)
 - **Reihenfolge per Drag-and-drop** in der Miniaturansicht ändern
+- **PDFs zusammenführen** und **Seiten als neues PDF extrahieren**
+- **Drucken** (**Strg+P**) – vektoriell, mit allen Anmerkungen
+
+**Anmerken**
+- **Text einfügen** mit Schriftgröße, Fett, Kursiv, Unterstrichen und Textfarbe
+- **Textmarker** und **Stift** als Freihand-Striche, **Radiergummi** zum Entfernen
+- **Symbole**: Kreuz, Häkchen, Punkt, Umrandung, Durchstreichung
+- **Bilder einfügen** aus Datei oder per **Strg+V** aus der Zwischenablage –
+  drehen und zuschneiden direkt auf der Seite
+- **Unterschriften** (PNG/JPG) mit automatisch transparentem Hintergrund;
+  sie werden dauerhaft unter `%AppData%\Roaming\PdfEditor\Signaturen` gespeichert
+- **Kommentare**: Text markieren, per Rechtsklick kommentieren, beantworten und
+  als erledigt/abgelehnt markieren
+
+**Formulare**
 - **Formulare ausfüllen** – die Eingabefelder erscheinen direkt auf der Seite
-- **Unterschriften einfügen** (PNG/JPG), frei verschieben und skalieren –
-  der (üblicherweise weiße) Hintergrund wird automatisch transparent gemacht
-- **Mehrere Unterschriften** werden dauerhaft unter
-  `%AppData%\Roaming\PdfEditor\Signaturen` gespeichert
-- **Text einfügen** an beliebiger Stelle – jederzeit editierbar. Über die
-  schwebende Leiste lassen sich **Schriftgröße, Fett, Kursiv, Unterstrichen und
-  Textfarbe** einstellen. Das Textfeld **wächst automatisch** mit der Schrift;
-  zum **Verschieben** den Rahmenrand greifen. Der Rahmen erscheint nur beim
-  Bearbeiten bzw. Verschieben.
-- **Textmarker** als **Freihand-Strich** mit der Maus über den Text ziehen
-  (kein fester Block). Der fertige Strich ist frei verschiebbar; der
-  Auswahlrahmen erscheint erst beim Anklicken. Mit **erneutem Klick auf die
-  Schaltfläche oder Esc** wird der Modus beendet.
-- **Radiergummi** – über einen Markierungsstrich ziehen, um ihn zu entfernen.
-- **Vorhandenen PDF-Text markieren & kopieren** – einfach mit der Maus über den
-  Text fahren (der Zeiger wird zum Textcursor) und markieren, dann **Strg+C**.
-  Kein Modus, kein Rahmen – wie in einem Texteingabefeld (zeilenweise Auswahl).
-- **Unterschriften** behalten beim Skalieren das **Seitenverhältnis** bei.
-- **Zoom** über die Symbolleiste oder per **Strg + Mausrad**.
+- **Formular-Designer**: Textfeld, mehrzeiliges Textfeld, Kontrollkästchen,
+  Optionsfelder, Dropdown, Listenfeld, Datums-, Zahlen- und Unterschriftsfeld
+  anlegen – mit Eigenschaften wie Pflichtfeld, Standardwert, Tooltip, Farben,
+  max. Zeichen
+- **Vorhandene Felder bearbeiten**: verschieben, Eigenschaften ändern oder löschen
+
+**Sonstiges**
+- **Vorhandenen PDF-Text markieren & kopieren** (**Strg+C**) – ohne eigenen Modus
+- **Helles und dunkles Design**
+- Kostenlos, ohne Konto, ohne Werbung
 
 ## Technik
 
-- **C# / WPF** auf **.NET 8** (`net8.0-windows`), nur für Windows 11
+- **C# / WPF** auf **.NET 8** (`net8.0-windows`, `win-x64`)
 - Modernes Fluent-Design über **WPF-UI**
 - PDF-Anzeige über **PDFtoImage** (PDFium), Bearbeitung über **PDFsharp**
 - Textextraktion (für die Textauswahl) über **PdfPig**
@@ -54,62 +62,19 @@ dotnet run --project PdfEditor -c Release
 ```
 
 Die fertige Anwendung liegt anschließend unter
-`PdfEditor\bin\Release\net8.0-windows\perPDF.exe`.
+`PdfEditor\bin\Release\net8.0-windows\win-x64\perPDF.exe`.
+
+Die Versionsnummer stammt ausschließlich aus dem Git-Tag `vX.Y.Z` – ohne
+erreichbaren Tag schlägt der Build fehl.
 
 ## Installation
 
-Fertige MSI-Installer werden automatisch per GitHub Actions gebaut und als
-[Release](https://github.com/StefanW86/perPDF/releases/latest) veröffentlicht.
-Die aktuellste Version ist immer unter diesen festen URLs erreichbar:
+### Microsoft Store (empfohlen)
 
-```
-https://github.com/StefanW86/perPDF/releases/latest/download/perPDF.msi
-```
-
-(Redirect auf das aktuellste Release-Asset)
-
-```
-https://stefanw86.github.io/perPDF/perPDF.msi
-```
-
-(GitHub Pages – liefert die Datei direkt aus, ohne Weiterleitung)
-
-### Interaktiv
-
-MSI-Datei doppelklicken und dem Installationsassistenten folgen. Über die
-Schaltfläche „Erweitert“ auf der Willkommensseite lässt sich zwischen
-„Für alle Benutzer“ (Program Files, Admin-Rechte) und „Nur für mich“ wählen.
-
-### Silent / unbeaufsichtigt
-
-```powershell
-msiexec /i perPDF.msi /quiet /norestart
-```
-
-Mit Installationsprotokoll:
-
-```powershell
-msiexec /i perPDF.msi /qn /norestart /log install.log
-```
-
-Bei stiller Installation wird immer **pro System** installiert (Program
-Files, `ALLUSERS=1`), da der Dialog zur Auswahl „nur für mich“ dabei
-übersprungen wird – dafür sind **Administratorrechte** (erhöhte
-Eingabeaufforderung) erforderlich.
-
-### Deinstallation
-
-Über „Apps & Features“ in Windows, oder silent:
-
-```powershell
-msiexec /x perPDF.msi /quiet /norestart
-```
-
-### Update
-
-Eine neuere Version kann direkt über die alte installiert werden
-(`msiexec /i` mit der neuen MSI) – ältere Versionen werden automatisch
-entfernt und ersetzt (Major Upgrade).
+perPDF wird im **Microsoft Store** bereitgestellt – dort ist die App von
+Microsoft **signiert**, wird automatisch aktualisiert und lässt sich ohne
+Administratorrechte installieren:
+[perPDF im Microsoft Store](https://apps.microsoft.com/detail/9NZQ8GX88724)
 
 ## Hinweise
 
