@@ -87,6 +87,14 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+#if DEBUG
+        if (e.Args.Contains("--selbsttest"))
+        {
+            Services.ScanPdf.Selbsttest(); // wirft bei Fehlschlag → Exitcode ≠ 0
+            Shutdown(0);
+            return;
+        }
+#endif
         // Design: eigene Wahl aus den Einstellungen, sonst das Windows-Design (live nachgeführt).
         GewähltesDesign = Services.FensterEinstellungen.Laden()?.DunkelGewählt;
         DesignAnwenden(GewähltesDesign ?? WindowsIstDunkel());
