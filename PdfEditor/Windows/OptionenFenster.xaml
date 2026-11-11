@@ -31,7 +31,7 @@
 
             <TextBlock Text="Dateiname" Margin="0,0,0,4" />
             <ui:TextBox x:Name="DateinameFeld" TextChanged="Eingabe_TextChanged" />
-            <TextBlock Text="Platzhalter: {Datum} = Jahr-Monat-Tag, {Zeit} = Stunde-Minute-Sekunde. Die Endung .pdf wird ergänzt."
+            <TextBlock Text="Platzhalter: {Datum} = Jahr-Monat-Tag, {Zeit} = Stunde-Minute (24 h). Die Endung .pdf wird ergänzt."
                        Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,8" />
             <TextBlock x:Name="BeispielText" FontSize="12" TextWrapping="Wrap" />
 

@@ -50,7 +50,7 @@ public static class Optionen
 
     /// <summary>
     /// Bildet aus der Vorlage einen gültigen Dateinamen mit Endung .pdf:
-    /// {Datum} → yyyy-MM-dd, {Zeit} → HH-mm-ss; ungültige Zeichen werden zu „_“.
+    /// {Datum} → yyyy-MM-dd, {Zeit} → HH-mm; ungültige Zeichen werden zu „_“.
     /// </summary>
     public static string ScanDateiname(string vorlage, DateTime zeit)
     {
@@ -58,7 +58,7 @@ public static class Optionen
             vorlage = StandardScanDateiname;
         string name = vorlage.Trim()
             .Replace("{Datum}", zeit.ToString("yyyy-MM-dd"))
-            .Replace("{Zeit}", zeit.ToString("HH-mm-ss"));
+            .Replace("{Zeit}", zeit.ToString("HH-mm"));
         foreach (char c in Path.GetInvalidFileNameChars())
             name = name.Replace(c, '_');
         return name.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) ? name : name + ".pdf";
