@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Text;
 using PdfEditor.Models;
@@ -40,7 +40,7 @@ public partial class PdfDokumentDienst
     /// <summary>
     /// Übernimmt bereits gelesene Bytes als aktives Dokument (für asynchrones Laden).
     /// </summary>
-    public void ÖffnenAusBytes(byte[] bytes, string pfad)
+    public void ÖffnenAusBytes(byte[] bytes, string? pfad)
     {
         AktuelleBytes = bytes;
         Pfad = pfad;
@@ -71,6 +71,13 @@ public partial class PdfDokumentDienst
         using var quelle = PdfReader.Open(quellpfad, PdfDocumentOpenMode.Import);
         int an = Math.Clamp(index, 0, d.PageCount);
         d.Pages.InsertRange(an, quelle);
+    });
+
+    /// <summary>Hängt alle Seiten eines PDFs (als Bytes, z. B. ein Scan) am Ende an.</summary>
+    public void SeitenAnhängen(byte[] pdfBytes) => Transformieren(d =>
+    {
+        using var quelle = PdfReader.Open(new MemoryStream(pdfBytes), PdfDocumentOpenMode.Import);
+        d.Pages.InsertRange(d.PageCount, quelle);
     });
 
     /// <summary>Entfernt die Seite mit dem angegebenen Index.</summary>
