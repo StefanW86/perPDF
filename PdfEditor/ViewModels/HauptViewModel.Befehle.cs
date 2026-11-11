@@ -123,10 +123,10 @@ public partial class HauptViewModel
         else
         {
             // Vor dem Überschreiben des aktuellen Dokuments rückfragen.
-            var antwort = MessageBox.Show(
-                $"Das aktuelle Dokument \"{Path.GetFileName(ziel)}\" wirklich überschreiben?",
-                "Speichern bestätigen", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (antwort != MessageBoxResult.Yes)
+            int antwort = Windows.MeldungFenster.Fragen("Speichern bestätigen",
+                $"„{Path.GetFileName(ziel)}“ überschreiben?",
+                MessageBoxImage.Question, "Überschreiben", "Abbrechen");
+            if (antwort != 0)
                 return;
         }
 

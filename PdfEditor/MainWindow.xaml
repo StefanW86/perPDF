@@ -960,7 +960,7 @@
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           SelectedItemChanged="TocBaum_SelectedItemChanged">
                     <TreeView.ItemContainerStyle>
-                        <Style TargetType="TreeViewItem">
+                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                             <Setter Property="IsExpanded" Value="{Binding IstAufgeklappt, Mode=TwoWay}" />
                             <Setter Property="Padding" Value="2,3" />
                         </Style>

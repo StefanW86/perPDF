@@ -117,15 +117,13 @@ public partial class SeitenAuswahlFenster : Wpf.Ui.Controls.FluentWindow
         var auswahl = AktuelleAuswahl();
         if (auswahl.Count == 0)
         {
-            MessageBox.Show("Bitte mindestens eine Seite auswählen.",
-                "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+            MeldungFenster.Zeigen("Hinweis", "Bitte mindestens eine Seite auswählen.", MessageBoxImage.Information);
             return;
         }
 
         if (_modus == SeitenAuswahlModus.Entfernen && auswahl.Count >= _vm.Seiten.Count)
         {
-            MessageBox.Show("Das Dokument muss mindestens eine Seite behalten.",
-                "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+            MeldungFenster.Zeigen("Hinweis", "Das Dokument muss mindestens eine Seite behalten.", MessageBoxImage.Information);
             return;
         }
 
@@ -137,9 +135,7 @@ public partial class SeitenAuswahlFenster : Wpf.Ui.Controls.FluentWindow
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Die Seiten konnten nicht extrahiert werden.\n\nDetails: {ex.Message}",
-                    "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                MeldungFenster.Zeigen("Fehler", $"Die Seiten konnten nicht extrahiert werden.\n\nDetails: {ex.Message}", MessageBoxImage.Error);
                 return;
             }
         }

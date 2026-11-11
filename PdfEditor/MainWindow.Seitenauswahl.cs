@@ -40,9 +40,9 @@ public partial class MainWindow
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
+            MeldungFenster.Zeigen(this, "Fehler",
                 $"Die Datei konnte nicht gespeichert werden.\n\nDetails: {ex.Message}",
-                "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxImage.Error);
             return;
         }
 
@@ -51,10 +51,10 @@ public partial class MainWindow
             ? $"1 Seite extrahiert nach {Path.GetFileName(dlg.FileName)}."
             : $"{anzahl} Seiten extrahiert nach {Path.GetFileName(dlg.FileName)}.";
 
-        var antwort = MessageBox.Show(
-            "Das extrahierte Dokument wurde gespeichert.\n\nSoll es in einem neuen Tab geöffnet werden?",
-            "Seiten extrahieren", MessageBoxButton.YesNo, MessageBoxImage.Question);
-        if (antwort == MessageBoxResult.Yes)
+        int antwort = MeldungFenster.Fragen(this, "Seiten extrahieren",
+            "Das extrahierte Dokument wurde gespeichert.",
+            MessageBoxImage.Information, "In neuem Tab öffnen", "Schließen");
+        if (antwort == 0)
         {
             var tab = TabNeuErstellen();
             tab.ViewModel.DateiLaden(dlg.FileName);

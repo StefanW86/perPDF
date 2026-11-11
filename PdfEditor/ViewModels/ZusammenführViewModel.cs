@@ -67,9 +67,7 @@ public class ZusammenführViewModel : BeobachtbaresObjekt
         }
         catch (Exception ex)
         {
-            System.Windows.MessageBox.Show(
-                $"Die Datei konnte nicht geladen werden.\n\nDetails: {ex.Message}",
-                "Fehler", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            Windows.MeldungFenster.Zeigen("Fehler", $"Die Datei konnte nicht geladen werden.\n\nDetails: {ex.Message}", System.Windows.MessageBoxImage.Error);
         }
     }
 
@@ -130,10 +128,7 @@ public class ZusammenführViewModel : BeobachtbaresObjekt
     {
         if (LinkeSeiten.Count <= 1)
         {
-            System.Windows.MessageBox.Show(
-                "Das Dokument muss mindestens eine Seite behalten.",
-                "Hinweis", System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Information);
+            Windows.MeldungFenster.Zeigen("Hinweis", "Das Dokument muss mindestens eine Seite behalten.", System.Windows.MessageBoxImage.Information);
             return;
         }
         if (listenIndex < 0 || listenIndex >= LinkeSeiten.Count) return;

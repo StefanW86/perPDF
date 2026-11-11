@@ -261,7 +261,6 @@ public partial class HauptViewModel
     private void Fehler(string nachricht, Exception ex)
     {
         Status = nachricht;
-        MessageBox.Show($"{nachricht}\n\nDetails: {ex.Message}", "Fehler",
-            MessageBoxButton.OK, MessageBoxImage.Error);
+        Windows.MeldungFenster.Zeigen("Fehler", $"{nachricht}\n\nDetails: {ex.Message}", MessageBoxImage.Error);
     }
 }

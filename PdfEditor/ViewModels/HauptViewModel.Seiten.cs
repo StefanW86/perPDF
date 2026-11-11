@@ -49,10 +49,10 @@ public partial class HauptViewModel
         }
         if (rückfragen && ziele.Count > 1)
         {
-            var antwort = MessageBox.Show(
-                $"Sollen die {ziele.Count} ausgewählten Seiten gelöscht werden?",
-                "Seiten löschen", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (antwort != MessageBoxResult.Yes)
+            int antwort = Windows.MeldungFenster.Fragen("Seiten löschen",
+                $"{ziele.Count} ausgewählte Seiten löschen?",
+                MessageBoxImage.Question, "Löschen", "Abbrechen");
+            if (antwort != 0)
                 return;
         }
 

@@ -44,8 +44,7 @@ public partial class OptionenFenster : Wpf.Ui.Controls.FluentWindow
         string ordner = OrdnerFeld.Text.Trim();
         if (!Path.IsPathFullyQualified(ordner) || ordner.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
         {
-            MessageBox.Show(this, "Bitte einen vollständigen Ordnerpfad angeben, z. B. C:\\Users\\Name\\Documents\\Scans.",
-                "Optionen", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MeldungFenster.Zeigen(this, "Optionen", "Bitte einen vollständigen Ordnerpfad angeben, z. B. C:\\Users\\Name\\Documents\\Scans.", MessageBoxImage.Warning);
             return;
         }
         try
@@ -54,8 +53,7 @@ public partial class OptionenFenster : Wpf.Ui.Controls.FluentWindow
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "Die Optionen konnten nicht gespeichert werden:\n" + ex.Message,
-                "Optionen", MessageBoxButton.OK, MessageBoxImage.Error);
+            MeldungFenster.Zeigen(this, "Optionen", "Die Optionen konnten nicht gespeichert werden:\n" + ex.Message, MessageBoxImage.Error);
             return;
         }
         DialogResult = true;

@@ -49,9 +49,7 @@ public partial class ZusammenführenFenster : Wpf.Ui.Controls.FluentWindow, IDro
     {
         if (_vm.RechteSeiten.Count == 0)
         {
-            MessageBox.Show(
-                "Bitte zuerst ein zweites Dokument laden.",
-                "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+            MeldungFenster.Zeigen("Hinweis", "Bitte zuerst ein zweites Dokument laden.", MessageBoxImage.Information);
             return;
         }
         _vm.GanzesDokumentAnhängen();

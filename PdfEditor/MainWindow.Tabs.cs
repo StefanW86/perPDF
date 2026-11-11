@@ -223,15 +223,13 @@ public partial class MainWindow
             var datei = tab.ViewModel.Pfad is null
                 ? "Ohne Titel"
                 : System.IO.Path.GetFileName(tab.ViewModel.Pfad);
-            var ergebnis = MessageBox.Show(
-                $"„{datei}“ hat ungespeicherte Änderungen.\n\nMöchten Sie die Änderungen speichern?",
-                "Dokument schließen",
-                MessageBoxButton.YesNoCancel,
-                MessageBoxImage.Warning);
+            int ergebnis = Windows.MeldungFenster.Fragen(this, "Dokument schließen",
+                $"„{datei}“ hat ungespeicherte Änderungen.",
+                MessageBoxImage.Warning, "Speichern", "Nicht speichern", "Abbrechen");
 
-            if (ergebnis == MessageBoxResult.Cancel)
+            if (ergebnis == 2)
                 return false;
-            if (ergebnis == MessageBoxResult.Yes)
+            if (ergebnis == 0)
                 tab.ViewModel.SpeichernBefehl.Execute(null);
         }
 

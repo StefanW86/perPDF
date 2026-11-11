@@ -25,23 +25,22 @@ public partial class MainWindow
         string name = _vm.Pfad is null ? "Ohne Titel" : Path.GetFileName(_vm.Pfad);
         while (true)
         {
-            var antwort = MessageBox.Show(this,
-                $"Sollen die {fenster.SeitenAnzahl} gescannten Seite(n) an „{name}“ angehängt werden?\n\n" +
-                "Ja = an das geöffnete Dokument anhängen\nNein = als neues Dokument öffnen\n" +
-                "Abbrechen = Scan verwerfen",
-                "Scannen", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            int antwort = Windows.MeldungFenster.Fragen(this, "Scannen",
+                $"{SeitenText(fenster.SeitenAnzahl)} gescannt.\n\nZu „{name}“ hinzufügen?",
+                MessageBoxImage.Question, "Anhängen", "Neues Dokument", "Verwerfen");
             switch (antwort)
             {
-                case MessageBoxResult.Yes:
+                case 0:
                     _vm.ScanAnhängen(pdf);
                     return;
-                case MessageBoxResult.No:
+                case 1:
                     ScanAlsNeuesDokument(pdf);
                     return;
                 default:
                     // Kein versehentlicher Verlust: Verwerfen nochmals bestätigen.
-                    if (MessageBox.Show(this, "Gescannte Seiten wirklich verwerfen?", "Scannen",
-                            MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                    if (Windows.MeldungFenster.Fragen(this, "Scannen",
+                            $"{SeitenText(fenster.SeitenAnzahl)} verwerfen?",
+                            MessageBoxImage.Warning, "Verwerfen", "Zurück") == 0)
                         return;
                     break;
             }
@@ -69,13 +68,15 @@ public partial class MainWindow
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this,
+            Windows.MeldungFenster.Zeigen(this, "Scannen",
                 "Der Scan konnte nicht im Scan-Ordner gespeichert werden:\n" + ex.Message +
                 "\n\nEr wird als ungespeichertes Dokument geöffnet.",
-                "Scannen", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxImage.Warning);
             ziel.ScanAlsNeuesDokument(pdf);
             return;
         }
         ziel.DateiLaden(pfad);
     }
+
+    private static string SeitenText(int anzahl) => anzahl == 1 ? "1 Seite" : $"{anzahl} Seiten";
 }

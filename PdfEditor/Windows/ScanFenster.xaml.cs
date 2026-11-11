@@ -153,11 +153,10 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
         if (_seiten.Count == vorher)
             return; // nichts gescannt (Fehler wurde bereits gemeldet)
 
-        var antwort = MessageBox.Show(this,
-            $"{_seiten.Count} Seite(n) gescannt.\n\nWeitere Seiten scannen?\n\n" +
-            "Ja = weitere Seiten einlegen und erneut scannen\nNein = Scan abschließen",
-            "Scannen", MessageBoxButton.YesNo, MessageBoxImage.Question);
-        if (antwort == MessageBoxResult.No)
+        int antwort = MeldungFenster.Fragen(this, "Scannen",
+            $"{SeitenWort(_seiten.Count)} gescannt.\n\nWeitere Seiten scannen?",
+            MessageBoxImage.Question, "Weitere scannen", "Fertig");
+        if (antwort == 1)
             await AbschließenAsync();
     }
 
@@ -177,7 +176,7 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
             if (ex.BisherigeSeiten > 0)
                 text += $"\n\nDie {ex.BisherigeSeiten} bereits gescannten Seite(n) dieses Durchgangs wurden " +
                         "übernommen. Bitte die restlichen Blätter neu einlegen.";
-            MessageBox.Show(this, text, "Scannen", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MeldungFenster.Zeigen(this, "Scannen", text, MessageBoxImage.Warning);
         }
         finally
         {
@@ -206,8 +205,8 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
         catch (Exception ex)
         {
             Beschäftigt(false, "");
-            MessageBox.Show(this, "Das PDF konnte nicht erstellt werden:\n" + ex.Message, "Scannen",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
+            MeldungFenster.Zeigen(this, "Scannen", "Das PDF konnte nicht erstellt werden:\n" + ex.Message,
+                                  MessageBoxImage.Error);
             return;
         }
         Einstellungenspeichern();
@@ -227,9 +226,9 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
             e.Cancel = true; // während eines Scans nicht schließen
             return;
         }
-        if (_seiten.Count > 0 && MessageBox.Show(this,
-                $"{_seiten.Count} gescannte Seite(n) verwerfen?", "Scannen",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        if (_seiten.Count > 0 && MeldungFenster.Fragen(this, "Scannen",
+                $"{SeitenWort(_seiten.Count)} verwerfen?",
+                MessageBoxImage.Warning, "Verwerfen", "Zurück") != 0)
         {
             e.Cancel = true;
             return;
@@ -249,6 +248,8 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
     }
 
     private void SeitenTextAktualisieren() => SeitenText.Text = $"{_seiten.Count} Seite(n) gescannt.";
+
+    private static string SeitenWort(int anzahl) => anzahl == 1 ? "1 Seite" : $"{anzahl} Seiten";
 
     private ScanZustand ZustandAusOberfläche() => new()
     {
