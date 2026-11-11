@@ -288,7 +288,8 @@ public sealed class TextAuswahlEbene : Canvas
             var rechteck = new Rectangle
             {
                 Width = r.Width,
-                Height = r.Height,
+                // Die Zeilenbox endet bündig unter den Unterlängen; unten etwas überstehen lassen wie oben.
+                Height = r.Height * 1.06,
                 Fill = Markierung,
                 IsHitTestVisible = false
             };
