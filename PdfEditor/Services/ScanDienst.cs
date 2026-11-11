@@ -133,7 +133,7 @@ public static class ScanDienst
             }
             catch (COMException ex)
             {
-                tcs.SetException(new ScanFehler(Meldung(ex.HResult), anzahl));
+                tcs.SetException(new ScanFehler(Meldung(ex), anzahl));
             }
             catch (Exception ex)
             {
@@ -145,7 +145,7 @@ public static class ScanDienst
         return tcs.Task;
     }
 
-    private static string Meldung(int hresult) => (uint)hresult switch
+    private static string Meldung(COMException ex) => (uint)ex.HResult switch
     {
         0x80210003 => "Kein Papier im Einzug.",
         0x80210002 => "Papierstau im Scanner.",
@@ -154,7 +154,7 @@ public static class ScanDienst
         0x80210015 => "Der Scanner ist nicht erreichbar (ausgeschaltet oder getrennt).",
         0x80210006 => "Der Scanner ist belegt.",
         0x80210001 => "Der Scanner meldet einen allgemeinen Fehler.",
-        _ => $"Scanfehler (0x{hresult:X8})."
+        _ => $"Scanfehler: {ex.Message} (0x{ex.HResult:X8})"
     };
 
     private static void ItemEinrichten(dynamic item, ScanZustand e)

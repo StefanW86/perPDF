@@ -1,4 +1,4 @@
-<ui:FluentWindow x:Class="PdfEditor.MainWindow"
+﻿<ui:FluentWindow x:Class="PdfEditor.MainWindow"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -441,6 +441,13 @@
                                             <StackPanel>
                                                 <ui:SymbolIcon Symbol="Print28" FontSize="22" HorizontalAlignment="Center" />
                                                 <TextBlock Text="Drucken" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Click="Scannen_Click" ToolTip="Dokument scannen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="ScanDash28" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Scannen" Style="{StaticResource MenübandKnopfText}" />
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>

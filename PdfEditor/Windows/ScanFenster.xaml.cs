@@ -82,12 +82,15 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
             ScannerÄndernKnopf.IsEnabled = _scanner.Count > 0;
             return;
         }
-        ScannerText.Text = "Scanner: " + scanner.Name;
+        ScannerText.Text = $"Scanner: {scanner.Name} (wird abgefragt...)";
         ScannerText.ToolTip = scanner.Name;
+        QuelleAuswahl.ItemsSource = null;
         Bedienbar(false);
+        // Kann bei ausgeschalteten Netzwerkscannern einige Sekunden dauern.
         List<ScanQuelle> quellen = await Task.Run(() => ScanDienst.QuellenErmitteln(scanner.Id));
         if (!ReferenceEquals(_scannerAktiv, scanner))
             return; // inzwischen anderer Scanner gewählt
+        ScannerText.Text = "Scanner: " + scanner.Name;
         QuelleAuswahl.ItemsSource = quellen.Select(q => new Eintrag<ScanQuelle>(q, q switch
         {
             ScanQuelle.Einzug => "Einzug (einseitig)",
