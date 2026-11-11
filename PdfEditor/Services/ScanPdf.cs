@@ -73,6 +73,11 @@ public static class ScanPdf
             Prüfen(grau.GetPixel(100, 100).Red > 192, "Graustufen: Rand ist hell");
         }
 
+        // Quellen-Auswertung (0x8007 = realer Wert eines Lexmark XC4140)
+        Prüfen(ScanDienst.QuellenAus(0x8007).Count == 3, "Quellen: Flachbett+Einzug+Duplex");
+        Prüfen(ScanDienst.QuellenAus(0x2) is [ScanQuelle.Flachbett], "Quellen: nur Flachbett");
+        Prüfen(ScanDienst.QuellenAus(0x5) is [ScanQuelle.Einzug, ScanQuelle.EinzugDuplex], "Quellen: nur Einzug");
+
         // Erstellen läuft auch abseits des UI-Threads (Dialog erstellt das PDF im Hintergrund).
         byte[] hinten = ScanDienst.AufStaAsync(() => Erstellen([(png, ScanFarbe.Farbe, 300)])).GetAwaiter().GetResult();
         Prüfen(hinten.Length > 0, "Erstellen im Hintergrund");

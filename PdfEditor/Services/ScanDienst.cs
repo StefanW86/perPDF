@@ -51,27 +51,49 @@ public static class ScanDienst
         return liste;
     });
 
-    /// <summary>Die vom Scanner unterstützten Quellen (mindestens Flachbett).</summary>
+    /// <summary>
+    /// Die vom Scanner unterstützten Quellen. Schlägt die Abfrage auch im zweiten Versuch fehl
+    /// (z. B. Scanner wacht gerade aus dem Standby auf), werden alle Quellen angeboten –
+    /// der Scan selbst meldet dann ggf. einen verständlichen Fehler.
+    /// </summary>
     public static List<ScanQuelle> QuellenErmitteln(string scannerId) => AufSta(() =>
     {
+        for (int versuch = 1; versuch <= 2; versuch++)
+        {
+            try
+            {
+                return QuellenAus(FähigkeitenLesen(scannerId));
+            }
+            catch (Exception) when (versuch == 1)
+            {
+                Thread.Sleep(1500);
+            }
+            catch (Exception)
+            {
+                // auch der zweite Versuch scheiterte → unten alle Quellen anbieten
+            }
+        }
+        return [ScanQuelle.Flachbett, ScanQuelle.Einzug, ScanQuelle.EinzugDuplex];
+    });
+
+    private static int FähigkeitenLesen(string scannerId)
+    {
+        dynamic gerät = Verbinden(scannerId);
+        object? wert = Wert(gerät.Properties, DokumentFähigkeiten);
+        return wert is null ? Flachbett : Convert.ToInt32(wert);
+    }
+
+    /// <summary>Wertet WIA_DPS_DOCUMENT_HANDLING_CAPABILITIES aus (mindestens Flachbett).</summary>
+    internal static List<ScanQuelle> QuellenAus(int fähig)
+    {
         var quellen = new List<ScanQuelle>();
-        try
-        {
-            dynamic gerät = Verbinden(scannerId);
-            object? wert = Wert(gerät.Properties, DokumentFähigkeiten);
-            int fähig = wert is null ? Flachbett : Convert.ToInt32(wert);
-            if ((fähig & Flachbett) != 0) quellen.Add(ScanQuelle.Flachbett);
-            if ((fähig & Einzug) != 0) quellen.Add(ScanQuelle.Einzug);
-            if ((fähig & Einzug) != 0 && (fähig & Duplex) != 0) quellen.Add(ScanQuelle.EinzugDuplex);
-        }
-        catch (Exception)
-        {
-            // Gerät nicht erreichbar/verschwunden → nur Flachbett anbieten; der Scan meldet den Fehler.
-        }
+        if ((fähig & Flachbett) != 0) quellen.Add(ScanQuelle.Flachbett);
+        if ((fähig & Einzug) != 0) quellen.Add(ScanQuelle.Einzug);
+        if ((fähig & Einzug) != 0 && (fähig & Duplex) != 0) quellen.Add(ScanQuelle.EinzugDuplex);
         if (quellen.Count == 0)
             quellen.Add(ScanQuelle.Flachbett);
         return quellen;
-    });
+    }
 
     /// <summary>
     /// Scannt eine Seite (Flachbett) bzw. alle Blätter im Einzug. <paramref name="onSeite"/>
