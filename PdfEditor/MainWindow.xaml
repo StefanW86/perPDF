@@ -754,6 +754,13 @@
                                                Style="{StaticResource MenübandGruppenTitel}" />
                                     <StackPanel Orientation="Horizontal">
                                         <Button Style="{StaticResource MenübandKnopf}"
+                                                Click="OptionenÖffnen_Click" ToolTip="Optionen von perPDF">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="Settings28" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Optionen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
                                                 Click="ÜberFensterÖffnen" ToolTip="Über perPDF">
                                             <StackPanel>
                                                 <ui:SymbolIcon Symbol="Info28" FontSize="22" HorizontalAlignment="Center" />

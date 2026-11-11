@@ -78,6 +78,13 @@ public static class ScanPdf
         Prüfen(ScanDienst.QuellenAus(0x2) is [ScanQuelle.Flachbett], "Quellen: nur Flachbett");
         Prüfen(ScanDienst.QuellenAus(0x5) is [ScanQuelle.Einzug, ScanQuelle.EinzugDuplex], "Quellen: nur Einzug");
 
+        // Dateinamen neuer Scans aus der Vorlage
+        var zeit = new DateTime(2026, 11, 11, 10, 5, 33);
+        Prüfen(Optionen.ScanDateiname("SCAN_{Datum}_{Zeit}", zeit) == "SCAN_2026-11-11_10-05-33.pdf", "Dateiname Standard");
+        Prüfen(Optionen.ScanDateiname("Brief a/b:{Datum}", zeit) == "Brief a_b_2026-11-11.pdf", "Dateiname ungültige Zeichen");
+        Prüfen(Optionen.ScanDateiname("  ", zeit) == "SCAN_2026-11-11_10-05-33.pdf", "Dateiname leer → Standard");
+        Prüfen(Optionen.ScanDateiname("x.pdf", zeit) == "x.pdf", "Dateiname mit .pdf");
+
         // Erstellen läuft auch abseits des UI-Threads (Dialog erstellt das PDF im Hintergrund).
         byte[] hinten = ScanDienst.AufStaAsync(() => Erstellen([(png, ScanFarbe.Farbe, 300)])).GetAwaiter().GetResult();
         Prüfen(hinten.Length > 0, "Erstellen im Hintergrund");

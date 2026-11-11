@@ -160,6 +160,9 @@ public partial class MainWindow
         new Windows.ÜberFenster { Owner = this }.ShowDialog();
     }
 
+    private void OptionenÖffnen_Click(object sender, RoutedEventArgs e)
+        => new Windows.OptionenFenster { Owner = this }.ShowDialog();
+
     /// <summary>Öffnet das Zusammenführungsfenster und lädt das Ergebnis als neues Dokument.</summary>
     private void ZusammenführenÖffnen_Click(object sender, RoutedEventArgs e)
     {

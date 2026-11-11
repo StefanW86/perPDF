@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Windows;
+using PdfEditor.Services;
 using PdfEditor.ViewModels;
 
 namespace PdfEditor;
@@ -57,6 +58,24 @@ public partial class MainWindow
         HauptViewModel ziel = _aktiverTab is { } tab && !tab.ViewModel.HatDokument
             ? tab.ViewModel
             : TabNeuErstellen().ViewModel;
-        ziel.ScanAlsNeuesDokument(pdf);
+
+        // Neue Scans landen direkt als Datei im Scan-Ordner (siehe Optionen) und werden geöffnet.
+        string pfad;
+        try
+        {
+            pfad = Optionen.NeuerScanPfad(Optionen.Laden(), DateTime.Now);
+            Directory.CreateDirectory(Path.GetDirectoryName(pfad)!);
+            File.WriteAllBytes(pfad, pdf);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this,
+                "Der Scan konnte nicht im Scan-Ordner gespeichert werden:\n" + ex.Message +
+                "\n\nEr wird als ungespeichertes Dokument geöffnet.",
+                "Scannen", MessageBoxButton.OK, MessageBoxImage.Warning);
+            ziel.ScanAlsNeuesDokument(pdf);
+            return;
+        }
+        ziel.DateiLaden(pfad);
     }
 }
