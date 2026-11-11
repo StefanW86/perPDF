@@ -1,5 +1,6 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
+using PdfEditor.ViewModels;
 
 namespace PdfEditor;
 
@@ -16,7 +17,7 @@ public partial class MainWindow
 
         if (!_vm.HatDokument)
         {
-            _vm.ScanAlsNeuesDokument(pdf); // leerer aktiver Tab wird genutzt
+            ScanAlsNeuesDokument(pdf);
             return;
         }
 
@@ -34,7 +35,7 @@ public partial class MainWindow
                     _vm.ScanAnhängen(pdf);
                     return;
                 case MessageBoxResult.No:
-                    TabNeuErstellen().ViewModel.ScanAlsNeuesDokument(pdf);
+                    ScanAlsNeuesDokument(pdf);
                     return;
                 default:
                     // Kein versehentlicher Verlust: Verwerfen nochmals bestätigen.
@@ -44,5 +45,18 @@ public partial class MainWindow
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Lädt den Scan als neues Dokument: in den aktiven Tab, wenn dieser leer ist, sonst in einen
+    /// neuen. Ohne Tab ist <c>_vm</c> nur ein Platzhalter ohne angemeldete Ereignisse – darin
+    /// geladen würde die Seitenansicht nie gezeichnet, daher dann immer einen Tab anlegen.
+    /// </summary>
+    private void ScanAlsNeuesDokument(byte[] pdf)
+    {
+        HauptViewModel ziel = _aktiverTab is { } tab && !tab.ViewModel.HatDokument
+            ? tab.ViewModel
+            : TabNeuErstellen().ViewModel;
+        ziel.ScanAlsNeuesDokument(pdf);
     }
 }
