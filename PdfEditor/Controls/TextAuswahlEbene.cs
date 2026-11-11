@@ -131,6 +131,12 @@ public sealed class TextAuswahlEbene : Canvas
             return;
 
         Focus();
+        if (e.ClickCount == 2)
+        {
+            WortMarkieren(e.GetPosition(this));
+            e.Handled = true;
+            return;
+        }
         (_ankerZ, _ankerC) = Treffer(e.GetPosition(this));
         _cursorZ = _ankerZ;
         _cursorC = _ankerC;
@@ -263,6 +269,39 @@ public sealed class TextAuswahlEbene : Canvas
         return ankerZuerst
             ? (_ankerZ, _ankerC, _cursorZ, _cursorC)
             : (_cursorZ, _cursorC, _ankerZ, _ankerC);
+    }
+
+    /// <summary>Markiert das Wort (Buchstaben/Ziffern) unter dem Punkt; auf Leerraum passiert nichts.</summary>
+    private void WortMarkieren(Point p)
+    {
+        int zi = Treffer(p).Zeile;
+        Zeile z = _zeilen[zi];
+        if (z.Text.Length == 0)
+            return;
+
+        // Zeichen, in dessen Breite der Klick liegt (nicht die nächste Zeichengrenze).
+        int c = z.Text.Length - 1;
+        for (int i = 0; i < z.Text.Length; i++)
+            if (p.X < z.X[i + 1])
+            {
+                c = i;
+                break;
+            }
+        if (!char.IsLetterOrDigit(z.Text[c]))
+            return;
+
+        int von = c, bis = c + 1;
+        while (von > 0 && char.IsLetterOrDigit(z.Text[von - 1]))
+            von--;
+        while (bis < z.Text.Length && char.IsLetterOrDigit(z.Text[bis]))
+            bis++;
+
+        _ankerZ = _cursorZ = zi;
+        _ankerC = von;
+        _cursorC = bis;
+        _zieht = false;
+        _hatAuswahl = true;
+        AuswahlZeichnen();
     }
 
     private void AllesMarkieren()
