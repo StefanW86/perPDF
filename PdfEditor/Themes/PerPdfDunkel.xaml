@@ -14,6 +14,8 @@
     <SolidColorBrush x:Key="PpLeinwand" Color="#171A1A" />
     <SolidColorBrush x:Key="PpFläche" Color="#262B2A" />
     <SolidColorBrush x:Key="PpZeileAlt" Color="#2A3130" />
+    <!-- Schwebende Leisten liegen auf der weißen Seite: heller als PpFläche, damit der Kontrast nicht hart wirkt. -->
+    <SolidColorBrush x:Key="PpLeistenFläche" Color="#606C6A" />
     <SolidColorBrush x:Key="PpInk" Color="#E6EFEE" />
     <SolidColorBrush x:Key="PpGedämpft" Color="#93A8A7" />
     <SolidColorBrush x:Key="PpOrange" Color="#F4A93B" />

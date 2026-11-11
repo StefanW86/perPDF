@@ -38,6 +38,14 @@ public class TextNotiz : BeobachtbaresObjekt, IAufSeite
         set => SetzeWert(ref _fontGröße, value);
     }
 
+    private string _schriftart = "Arial";
+    /// <summary>Name der (installierten) Schriftfamilie.</summary>
+    public string Schriftart
+    {
+        get => _schriftart;
+        set => SetzeWert(ref _schriftart, value);
+    }
+
     private bool _fett;
     /// <summary>Fette Schrift.</summary>
     public bool Fett

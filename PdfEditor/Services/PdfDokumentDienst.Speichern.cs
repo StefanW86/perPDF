@@ -258,9 +258,16 @@ public partial class PdfDokumentDienst
             if (t.Fett) stil |= XFontStyleEx.Bold;
             if (t.Kursiv) stil |= XFontStyleEx.Italic;
             if (t.Unterstrichen) stil |= XFontStyleEx.Underline;
-            var schrift = new XFont("Arial", t.FontGröße, stil);
             var pinsel = new XSolidBrush(FarbeAusHex(t.Farbe));
-            gfx.DrawString(t.Text, schrift, pinsel, bereich, XStringFormats.TopLeft);
+            try
+            {
+                gfx.DrawString(t.Text, new XFont(t.Schriftart, t.FontGröße, stil), pinsel, bereich, XStringFormats.TopLeft);
+            }
+            catch
+            {
+                // Nicht auflös- oder einbettbare Schrift (z. B. altes Bildschirmformat) → Arial statt Abbruch.
+                gfx.DrawString(t.Text, new XFont(Schriftarten.Standard, t.FontGröße, stil), pinsel, bereich, XStringFormats.TopLeft);
+            }
         }
     }
 

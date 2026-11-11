@@ -13,6 +13,7 @@
     <SolidColorBrush x:Key="PpLeinwand" Color="#E7EBEB" />
     <SolidColorBrush x:Key="PpFläche" Color="#FFFFFF" />
     <SolidColorBrush x:Key="PpZeileAlt" Color="#F9FDFD" />
+    <SolidColorBrush x:Key="PpLeistenFläche" Color="#FFFFFF" />
     <SolidColorBrush x:Key="PpInk" Color="#1C2B2A" />
     <SolidColorBrush x:Key="PpGedämpft" Color="#6B8080" />
     <SolidColorBrush x:Key="PpOrange" Color="#F4A93B" />

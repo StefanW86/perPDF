@@ -36,6 +36,16 @@ public partial class HauptViewModel : BeobachtbaresObjekt
         TextEinfügenBefehl = new RelayCommand(TextEinfügen, () => _dienst.HatDokument);
         BildEinfügenBefehl = new RelayCommand(BildEinfügen, () => _dienst.HatDokument);
 
+        // Hinzufügen/Entfernen ausstehender Annotationen gilt als ungespeicherte Änderung.
+        // Reset (Clear nach Laden/Speichern) zählt nicht.
+        foreach (var sammlung in new System.Collections.Specialized.INotifyCollectionChanged[]
+                 { Platzierungen, Bilder, Textnotizen, Textmarkierungen, Symbolmarkierungen })
+            sammlung.CollectionChanged += (_, e) =>
+            {
+                if (!_istLaden && e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+                    IstGeändert = true;
+            };
+
         // Gespeicherte Unterschriften laden.
         foreach (var u in _speicher.Laden())
             Unterschriften.Add(u);

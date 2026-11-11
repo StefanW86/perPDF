@@ -347,10 +347,13 @@ public partial class HauptViewModel
         var info = _seitenInfos[AktuelleSeite];
         double breite = Math.Min(220, info.Breite * 0.6);
         const double höhe = 24;
+        // Standard: Schrift und Größe des nächstgelegenen vorhandenen Textes übernehmen.
+        var erkannt = Schriftarten.AnPosition(Bytes, AktuelleSeite, info, pdfX, pdfY);
         var notiz = new TextNotiz(AktuelleSeite)
         {
             Text = "Neuer Text",
-            FontGröße = 12,
+            FontGröße = erkannt is { Größe: >= 6 and <= 96 } e ? e.Größe : 12,
+            Schriftart = erkannt?.Familie ?? Schriftarten.Standard,
             Breite = breite,
             Höhe = höhe,
             X = pdfX,
@@ -360,7 +363,9 @@ public partial class HauptViewModel
         ZuletztEingefügteNotiz = notiz;
         EinfügeModusBeenden();
         AktuelleSeiteNeu?.Invoke();
-        Status = "Text eingefügt – tippen zum Bearbeiten, Leiste zum Formatieren, Griff zum Verschieben.";
+        Status = erkannt is { Familie: null } fehlt && fehlt.PdfName.Length > 0
+            ? $"Text eingefügt – die Dokumentschrift \"{fehlt.PdfName}\" ist nicht installiert, daher {Schriftarten.Standard}."
+            : "Text eingefügt – tippen zum Bearbeiten, Leiste zum Formatieren, Griff zum Verschieben.";
     }
 
     /// <summary>Entfernt eine Textnotiz wieder (aus dem Hauptfenster aufgerufen).</summary>

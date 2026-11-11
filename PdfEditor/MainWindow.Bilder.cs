@@ -153,11 +153,19 @@ public partial class MainWindow
         bool zuschnittModus = false;
         var zuschneiden = new ToggleButton
         {
-            Content = "Zuschneiden",
-            Height = 22,
-            FontSize = 11,
-            Padding = new Thickness(6, 0, 6, 0),
-            Margin = new Thickness(1, 0, 1, 0),
+            Style = (Style)FindResource("LeistenUmschalter"),
+            Content = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Children =
+                {
+                    Symbol(Wpf.Ui.Controls.SymbolRegular.Crop24),
+                    new TextBlock { Text = "Zuschneiden", FontSize = 11, Margin = new Thickness(4, 0, 0, 0),
+                                    VerticalAlignment = VerticalAlignment.Center }
+                }
+            },
+            Width = double.NaN,
+            Padding = new Thickness(6, 0, 8, 0),
             Focusable = false,
             ToolTip = "Zuschnittmodus: an den orangefarbenen Randgriffen ziehen"
         };
@@ -311,15 +319,15 @@ public partial class MainWindow
     }
 
     /// <summary>Schwebende Werkzeugleiste eines Bildes: links/rechts drehen und Zuschnittmodus.</summary>
-    private static FrameworkElement ErstelleBildLeiste(ToggleButton zuschneiden, Action<bool> drehen)
+    private FrameworkElement ErstelleBildLeiste(ToggleButton zuschneiden, Action<bool> drehen)
     {
         var panel = new StackPanel { Orientation = Orientation.Horizontal };
 
-        var linksDrehen = KleineSchaltfläche("↺", () => drehen(true));
-        linksDrehen.ToolTip = "90° nach links drehen";
+        var linksDrehen = KleineSchaltfläche(Wpf.Ui.Controls.SymbolRegular.ArrowRotateCounterclockwise24,
+            "90° nach links drehen", () => drehen(true));
         linksDrehen.Focusable = false;
-        var rechtsDrehen = KleineSchaltfläche("↻", () => drehen(false));
-        rechtsDrehen.ToolTip = "90° nach rechts drehen";
+        var rechtsDrehen = KleineSchaltfläche(Wpf.Ui.Controls.SymbolRegular.ArrowRotateClockwise24,
+            "90° nach rechts drehen", () => drehen(false));
         rechtsDrehen.Focusable = false;
 
         panel.Children.Add(linksDrehen);
@@ -327,16 +335,6 @@ public partial class MainWindow
         panel.Children.Add(Trenner());
         panel.Children.Add(zuschneiden);
 
-        return new Border
-        {
-            Background = new SolidColorBrush(Color.FromArgb(235, 255, 255, 255)),
-            BorderBrush = Akzent,
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(3),
-            Padding = new Thickness(2),
-            Child = panel,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top
-        };
+        return Leistenrahmen(panel);
     }
 }

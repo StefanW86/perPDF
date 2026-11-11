@@ -95,6 +95,45 @@
             <Setter Property="Height" Value="32" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+        <!-- Knöpfe der schwebenden Leisten über Text/Bild/Symbol auf der Seite. -->
+        <Style x:Key="LeistenKnopf" TargetType="ButtonBase" BasedOn="{StaticResource SymbolKnopf}">
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Margin" Value="1,0" />
+        </Style>
+        <Style x:Key="LeistenUmschalter" TargetType="ToggleButton" BasedOn="{StaticResource LeistenKnopf}">
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource PpTeal100}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource PpTeal200}" />
+                    <Setter Property="Foreground" Value="{DynamicResource PpAkzent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Schriftauswahl in der Textleiste: jeder Name in seiner Schrift, virtualisiert. -->
+        <Style x:Key="SchriftAuswahl" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Width" Value="150" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="Margin" Value="1,0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="MaxDropDownHeight" Value="320" />
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontFamily="{Binding}" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <!-- Speichern rechts im Menüband: neutral, bei ungespeicherten Änderungen gefüllter Akzent
              (höchstens ein gefüllter Akzentknopf je Ansicht). -->
         <Style x:Key="SpeichernKnopf" TargetType="Button">
