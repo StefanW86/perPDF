@@ -40,10 +40,11 @@ public partial class PdfDokumentDienst
     /// <summary>
     /// Übernimmt bereits gelesene Bytes als aktives Dokument (für asynchrones Laden).
     /// </summary>
-    public void ÖffnenAusBytes(byte[] bytes, string? pfad)
+    public void ÖffnenAusBytes(byte[] bytes, string? pfad, string? kennwort = null)
     {
         AktuelleBytes = bytes;
         Pfad = pfad;
+        Kennwort = kennwort;
     }
 
     /// <summary>Legt ein neues, leeres Dokument mit einer A4-Seite an.</summary>
@@ -54,6 +55,7 @@ public partial class PdfDokumentDienst
         p.Size = PageSize.A4;
         AktuelleBytes = NachBytes(d);
         Pfad = null;
+        Kennwort = null;
     }
 
     // ----- Seitenoperationen (Byte-Transformationen) -----------------------

@@ -32,7 +32,7 @@ public partial class PdfDokumentDienst
     {
         var bytes = NachBytesBacken(felder, platzierungen, bilder, texte, markierungen,
             symbole, entwürfe, zuLöschendeFelder, abdeckungen);
-        File.WriteAllBytes(pfad, bytes);
+        File.WriteAllBytes(pfad, Kennwort is null ? bytes : Verschlüsseln(bytes, Kennwort));
 
         // Das Dokument ist nach dem Speichern nicht mehr verwendbar – frische Bytes übernehmen.
         AktuelleBytes = bytes;

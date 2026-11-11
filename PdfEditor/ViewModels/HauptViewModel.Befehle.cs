@@ -12,38 +12,15 @@ public partial class HauptViewModel
 {
     // ----- Befehlsimplementierungen ----------------------------------------
 
-    private async void Öffnen()
+    private void Öffnen()
     {
         var dlg = new OpenFileDialog
         {
             Title = "PDF-Datei öffnen",
             Filter = "PDF-Dateien (*.pdf)|*.pdf"
         };
-        if (dlg.ShowDialog() != true)
-            return;
-
-        _istLaden = true;
-        IstGeändert = false;
-        LadestatusGeändert?.Invoke(true, "Lade Dokument...");
-        try
-        {
-            var bytes = await Task.Run(() => File.ReadAllBytes(dlg.FileName));
-            _dienst.ÖffnenAusBytes(bytes, dlg.FileName);
-            AusstehendeZurücksetzen();
-            FelderNeuLaden();
-            await NachStrukturänderungAsync(0);
-            Status = $"Geöffnet: {Path.GetFileName(dlg.FileName)}";
-            Melde(nameof(Titel));
-        }
-        catch (Exception ex)
-        {
-            Fehler("Die Datei konnte nicht geöffnet werden.", ex);
-        }
-        finally
-        {
-            LadestatusGeändert?.Invoke(false, "");
-            _istLaden = false;
-        }
+        if (dlg.ShowDialog() == true)
+            DateiLaden(dlg.FileName);
     }
 
     /// <summary>
@@ -58,7 +35,32 @@ public partial class HauptViewModel
         try
         {
             var bytes = await Task.Run(() => File.ReadAllBytes(pfad));
-            _dienst.ÖffnenAusBytes(bytes, pfad);
+            string? kennwort = null;
+            if (await Task.Run(() => PdfDokumentDienst.IstVerschlüsselt(bytes)))
+            {
+                while (true)
+                {
+                    kennwort = Windows.KennwortFenster.Abfragen("Kennwort eingeben",
+                        $"„{Path.GetFileName(pfad)}“ ist kennwortgeschützt.", "Öffnen", wiederholen: false);
+                    if (kennwort is null)
+                    {
+                        Status = "Öffnen abgebrochen.";
+                        return;
+                    }
+                    try
+                    {
+                        var k = kennwort;
+                        bytes = await Task.Run(() => PdfDokumentDienst.Entschlüsseln(bytes, k));
+                        break;
+                    }
+                    catch (PdfSharp.Pdf.IO.PdfReaderException)
+                    {
+                        Windows.MeldungFenster.Zeigen("Kennwort falsch",
+                            "Das Kennwort ist falsch. Bitte erneut versuchen.", MessageBoxImage.Warning);
+                    }
+                }
+            }
+            _dienst.ÖffnenAusBytes(bytes, pfad, kennwort);
             AusstehendeZurücksetzen();
             FelderNeuLaden();
             await NachStrukturänderungAsync(0);
@@ -87,7 +89,7 @@ public partial class HauptViewModel
         LadestatusGeändert?.Invoke(true, "Dokument wird übernommen...");
         try
         {
-            _dienst.ÖffnenAusBytes(bytes, _dienst.Pfad ?? "zusammengeführt.pdf");
+            _dienst.ÖffnenAusBytes(bytes, _dienst.Pfad ?? "zusammengeführt.pdf", _dienst.Kennwort);
             AusstehendeZurücksetzen();
             FelderNeuLaden();
             await NachStrukturänderungAsync(0);
@@ -105,7 +107,8 @@ public partial class HauptViewModel
         }
     }
 
-    private void Speichern(bool neuerPfad)
+    /// <summary>Speichert das Dokument; liefert <c>false</c> bei Abbruch oder Fehler.</summary>
+    private bool Speichern(bool neuerPfad)
     {
         string? ziel = _dienst.Pfad;
         if (neuerPfad || ziel is null)
@@ -117,7 +120,7 @@ public partial class HauptViewModel
                 FileName = ziel is null ? "Dokument.pdf" : Path.GetFileName(ziel)
             };
             if (dlg.ShowDialog() != true)
-                return;
+                return false;
             ziel = dlg.FileName;
         }
         else
@@ -127,7 +130,7 @@ public partial class HauptViewModel
                 $"„{Path.GetFileName(ziel)}“ überschreiben?",
                 MessageBoxImage.Question, "Überschreiben", "Abbrechen");
             if (antwort != 0)
-                return;
+                return false;
         }
 
         try
@@ -146,10 +149,12 @@ public partial class HauptViewModel
             IstGeändert = false;
             Status = $"Gespeichert: {Path.GetFileName(ziel)}";
             Melde(nameof(Titel));
+            return true;
         }
         catch (Exception ex)
         {
             Fehler("Die Datei konnte nicht gespeichert werden.", ex);
+            return false;
         }
     }
 

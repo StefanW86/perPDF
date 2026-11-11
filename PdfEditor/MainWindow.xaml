@@ -444,6 +444,20 @@
                                             </StackPanel>
                                         </Button>
                                         <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding KennwortSchützenBefehl}" ToolTip="Datei mit einem Kennwort schützen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="LockClosed24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Kennwort schützen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
+                                                Command="{Binding KennwortEntfernenBefehl}" ToolTip="Kennwortschutz der Datei entfernen">
+                                            <StackPanel>
+                                                <ui:SymbolIcon Symbol="LockOpen24" FontSize="22" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Kennwort entfernen" Style="{StaticResource MenübandKnopfText}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MenübandKnopf}"
                                                 Click="Scannen_Click" ToolTip="Dokument scannen">
                                             <StackPanel>
                                                 <ui:SymbolIcon Symbol="ScanDash28" FontSize="22" HorizontalAlignment="Center" />

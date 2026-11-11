@@ -25,6 +25,8 @@ public partial class HauptViewModel : BeobachtbaresObjekt
         SpeichernBefehl = new RelayCommand(() => Speichern(false), () => _dienst.HatDokument);
         SpeichernUnterBefehl = new RelayCommand(() => Speichern(true), () => _dienst.HatDokument);
         DruckenBefehl = new RelayCommand(Drucken, () => _dienst.HatDokument);
+        KennwortSchützenBefehl = new RelayCommand(KennwortSchützen, () => _dienst.HatDokument && _dienst.Kennwort is null);
+        KennwortEntfernenBefehl = new RelayCommand(KennwortEntfernen, () => _dienst.HatDokument && _dienst.Kennwort is not null);
         SeiteHinzufügenBefehl = new RelayCommand(SeiteHinzufügen);
         SeiteImportierenBefehl = new RelayCommand(SeitenImportieren, () => _dienst.HatDokument);
         SeiteLöschenBefehl = new RelayCommand(SeiteLöschen, () => _dienst.HatDokument && Seiten.Count > 1);

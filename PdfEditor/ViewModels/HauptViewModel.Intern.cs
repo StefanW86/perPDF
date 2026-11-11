@@ -248,6 +248,8 @@ public partial class HauptViewModel
         SpeichernBefehl.AusführbarkeitAktualisieren();
         SpeichernUnterBefehl.AusführbarkeitAktualisieren();
         DruckenBefehl.AusführbarkeitAktualisieren();
+        KennwortSchützenBefehl.AusführbarkeitAktualisieren();
+        KennwortEntfernenBefehl.AusführbarkeitAktualisieren();
         SeiteImportierenBefehl.AusführbarkeitAktualisieren();
         SeiteLöschenBefehl.AusführbarkeitAktualisieren();
         RechtsDrehenBefehl.AusführbarkeitAktualisieren();
