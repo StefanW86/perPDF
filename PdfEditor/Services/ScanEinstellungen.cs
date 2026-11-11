@@ -13,7 +13,7 @@ public class ScanZustand
     public string? ScannerId { get; set; }
     public ScanQuelle Quelle { get; set; } = ScanQuelle.Flachbett;
     public ScanPapier Papier { get; set; } = ScanPapier.A4;
-    public ScanFarbe Farbe { get; set; } = ScanFarbe.Graustufen;
+    public ScanFarbe Farbe { get; set; } = ScanFarbe.Farbe;
     public int Dpi { get; set; } = 300;
     /// <summary>-100..100</summary>
     public int Helligkeit { get; set; }

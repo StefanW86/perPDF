@@ -133,11 +133,11 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
     private async void Vorschau_Click(object sender, RoutedEventArgs e)
     {
         ScanZustand z = ZustandAusOberfläche();
-        z.Dpi = 75;
+        z.Dpi = 150; // genug Details zum Hineinzoomen
         byte[]? vorschau = null;
         await ScanAusführen(z, (bild, _) => vorschau = bild);
         if (vorschau is not null)
-            VorschauBild.Source = Bild(vorschau);
+            VorschauZeigen(Bild(vorschau));
     }
 
     private async void Scannen_Click(object sender, RoutedEventArgs e)
@@ -147,7 +147,7 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
         await ScanAusführen(z, (bild, dpi) =>
         {
             _seiten.Add((bild, z.Farbe, dpi));
-            VorschauBild.Source = Bild(bild);
+            VorschauZeigen(Bild(bild));
             SeitenTextAktualisieren();
         });
         if (_seiten.Count == vorher)
@@ -277,7 +277,7 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
         var bild = new BitmapImage();
         bild.BeginInit();
         bild.CacheOption = BitmapCacheOption.OnLoad;
-        bild.DecodePixelWidth = 1000; // Vorschau braucht keine volle Auflösung
+        bild.DecodePixelWidth = 2500; // scharf genug zum Hineinzoomen, spart Speicher
         bild.StreamSource = new MemoryStream(png);
         bild.EndInit();
         bild.Freeze();

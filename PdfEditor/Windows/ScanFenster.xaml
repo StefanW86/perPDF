@@ -3,8 +3,8 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  Title="Neuer Scan"
-                 Width="820" Height="600"
-                 MinWidth="700" MinHeight="520"
+                 Width="860" Height="800"
+                 MinWidth="700" MinHeight="600"
                  WindowStartupLocation="CenterOwner"
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica"
@@ -125,10 +125,26 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Border BorderThickness="1" Background="White"
+                <!-- Rahmen wird im Code auf A4-Hochformat (1 : √2) eingepasst -->
+                <Grid x:Name="VorschauPlatz" SizeChanged="VorschauPlatz_SizeChanged">
+                <Border x:Name="VorschauRahmen" BorderThickness="1" Background="White"
+                        HorizontalAlignment="Center" VerticalAlignment="Top"
                         BorderBrush="{DynamicResource ControlElevationBorderBrush}">
                     <Grid>
-                        <Image x:Name="VorschauBild" Stretch="Uniform" Margin="4" />
+                        <!-- Zoom: Mausrad; verschieben: ziehen; Doppelklick: ganze Seite -->
+                        <ScrollViewer x:Name="VorschauScroll" Focusable="False"
+                                      HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
+                                      PreviewMouseWheel="Vorschau_MouseWheel"
+                                      PreviewMouseLeftButtonDown="Vorschau_MouseDown"
+                                      PreviewMouseMove="Vorschau_MouseMove"
+                                      PreviewMouseLeftButtonUp="Vorschau_MouseUp">
+                            <Image x:Name="VorschauBild" Stretch="Uniform" />
+                        </ScrollViewer>
+                        <Border x:Name="ZoomAnzeige" Visibility="Collapsed" Background="#B0000000"
+                                CornerRadius="4" Padding="6,2" Margin="6"
+                                HorizontalAlignment="Right" VerticalAlignment="Top">
+                            <TextBlock x:Name="ZoomText" Foreground="White" FontSize="11" />
+                        </Border>
                         <StackPanel x:Name="ScanAnzeige" Visibility="Collapsed"
                                     HorizontalAlignment="Center" VerticalAlignment="Center">
                             <ui:ProgressRing IsIndeterminate="True" />
@@ -137,7 +153,12 @@
                         </StackPanel>
                     </Grid>
                 </Border>
-                <TextBlock x:Name="SeitenText" Grid.Row="1" Margin="0,6,0,0" Text="Noch keine Seiten gescannt." />
+                </Grid>
+                <StackPanel Grid.Row="1" Margin="0,6,0,0">
+                    <TextBlock x:Name="SeitenText" Text="Noch keine Seiten gescannt." />
+                    <TextBlock Opacity="0.7" FontSize="11" Margin="0,2,0,0"
+                               Text="Vorschau: Mausrad = Zoom · Ziehen = verschieben · Doppelklick = ganze Seite" />
+                </StackPanel>
             </Grid>
         </Grid>
 
