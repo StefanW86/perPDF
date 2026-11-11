@@ -64,9 +64,9 @@ public static class ScanDienst
             if ((fähig & Einzug) != 0) quellen.Add(ScanQuelle.Einzug);
             if ((fähig & Einzug) != 0 && (fähig & Duplex) != 0) quellen.Add(ScanQuelle.EinzugDuplex);
         }
-        catch (COMException)
+        catch (Exception)
         {
-            // Gerät nicht erreichbar → nur Flachbett anbieten; der Scan meldet den Fehler.
+            // Gerät nicht erreichbar/verschwunden → nur Flachbett anbieten; der Scan meldet den Fehler.
         }
         if (quellen.Count == 0)
             quellen.Add(ScanQuelle.Flachbett);
@@ -75,10 +75,10 @@ public static class ScanDienst
 
     /// <summary>
     /// Scannt eine Seite (Flachbett) bzw. alle Blätter im Einzug. <paramref name="onSeite"/>
-    /// erhält jede fertige Seite als PNG (auf dem Scan-Thread), damit Seiten vor einem
-    /// Fehler erhalten bleiben. Wirft <see cref="ScanFehler"/>.
+    /// erhält jede fertige Seite als Bilddaten (PNG, sonst BMP) und ihre tatsächliche DPI
+    /// (auf dem Scan-Thread), damit Seiten vor einem Fehler erhalten bleiben. Wirft <see cref="ScanFehler"/>.
     /// </summary>
-    public static Task ScannenAsync(string scannerId, ScanZustand e, Action<byte[]> onSeite,
+    public static Task ScannenAsync(string scannerId, ScanZustand e, Action<byte[], int> onSeite,
                                     CancellationToken ct = default)
     {
         var tcs = new TaskCompletionSource();
@@ -105,20 +105,28 @@ public static class ScanDienst
                     throw new ScanFehler("Der Scanner bietet keine Scanfläche an.", 0);
                 ItemEinrichten(item, e);
 
+                bool pngMöglich = true;
                 do
                 {
                     ct.ThrowIfCancellationRequested();
-                    byte[] png;
+                    dynamic? bild;
                     try
                     {
-                        dynamic bild = item.Transfer(FormatPng);
-                        png = (byte[])bild.FileData.BinaryData;
+                        bild = Übertragen(item, ref pngMöglich);
                     }
                     catch (COMException ex) when (istEinzug && ex.HResult == PapierLeer && anzahl > 0)
                     {
                         break; // Einzug leer → normales Ende
                     }
-                    onSeite(png);
+                    if (bild is null)
+                    {
+                        if (anzahl > 0) break; // manche Treiber melden das Ende so
+                        throw new ScanFehler(istEinzug ? "Kein Papier im Einzug." : "Der Scanner hat kein Bild geliefert.", 0);
+                    }
+                    byte[] daten = (byte[])bild.FileData.BinaryData;
+                    // Tatsächliche Auflösung: Treiber dürfen die gewünschte DPI ablehnen.
+                    int dpi = Convert.ToInt32(bild.HorizontalResolution);
+                    onSeite(daten, dpi > 0 ? dpi : e.Dpi);
                     anzahl++;
                 } while (istEinzug);
                 tcs.SetResult();
@@ -145,6 +153,23 @@ public static class ScanDienst
         return tcs.Task;
     }
 
+    /// <summary>Überträgt eine Seite, bevorzugt als PNG; lehnt der Treiber PNG ab, im Standardformat (BMP).</summary>
+    private static dynamic? Übertragen(dynamic item, ref bool pngMöglich)
+    {
+        if (pngMöglich)
+        {
+            try
+            {
+                return item.Transfer(FormatPng);
+            }
+            catch (COMException ex) when ((uint)ex.HResult is 0x80070057 or 0x80004001 or 0x8021000C)
+            {
+                pngMöglich = false; // Ungültiges Argument / nicht implementiert / ungültige Einstellung
+            }
+        }
+        return item.Transfer();
+    }
+
     private static string Meldung(COMException ex) => (uint)ex.HResult switch
     {
         0x80210003 => "Kein Papier im Einzug.",
@@ -153,6 +178,7 @@ public static class ScanDienst
         0x80210005 => "Der Scanner ist nicht erreichbar (ausgeschaltet oder getrennt).",
         0x80210015 => "Der Scanner ist nicht erreichbar (ausgeschaltet oder getrennt).",
         0x80210006 => "Der Scanner ist belegt.",
+        0x8021000A => "Die Verbindung zum Scanner ist gestört.",
         0x80210001 => "Der Scanner meldet einen allgemeinen Fehler.",
         _ => $"Scanfehler: {ex.Message} (0x{ex.HResult:X8})"
     };
@@ -237,16 +263,19 @@ public static class ScanDienst
         Setzen(props, id, (int)Math.Round(min + (wert + 100) / 200.0 * (max - min)));
     }
 
-    private static T AufSta<T>(Func<T> f)
+    private static T AufSta<T>(Func<T> f) => AufStaAsync(f).GetAwaiter().GetResult();
+
+    /// <summary>Führt <paramref name="f"/> auf einem eigenen STA-Thread aus (WIA/WPF-Imaging brauchen STA).</summary>
+    public static Task<T> AufStaAsync<T>(Func<T> f)
     {
-        T ergebnis = default!;
-        Exception? fehler = null;
-        var t = new Thread(() => { try { ergebnis = f(); } catch (Exception ex) { fehler = ex; } });
+        var tcs = new TaskCompletionSource<T>();
+        var t = new Thread(() =>
+        {
+            try { tcs.SetResult(f()); }
+            catch (Exception ex) { tcs.SetException(ex); }
+        }) { IsBackground = true };
         t.SetApartmentState(ApartmentState.STA);
         t.Start();
-        t.Join();
-        if (fehler is not null)
-            throw fehler;
-        return ergebnis;
+        return tcs.Task;
     }
 }

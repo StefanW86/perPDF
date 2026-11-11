@@ -135,7 +135,7 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
         ScanZustand z = ZustandAusOberfläche();
         z.Dpi = 75;
         byte[]? vorschau = null;
-        await ScanAusführen(z, png => vorschau = png);
+        await ScanAusführen(z, (bild, _) => vorschau = bild);
         if (vorschau is not null)
             VorschauBild.Source = Bild(vorschau);
     }
@@ -144,10 +144,10 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
     {
         ScanZustand z = ZustandAusOberfläche();
         int vorher = _seiten.Count;
-        await ScanAusführen(z, png =>
+        await ScanAusführen(z, (bild, dpi) =>
         {
-            _seiten.Add((png, z.Farbe, z.Dpi));
-            VorschauBild.Source = Bild(png);
+            _seiten.Add((bild, z.Farbe, dpi));
+            VorschauBild.Source = Bild(bild);
             SeitenTextAktualisieren();
         });
         if (_seiten.Count == vorher)
@@ -158,20 +158,18 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
             "Ja = weitere Seiten einlegen und erneut scannen\nNein = Scan abschließen",
             "Scannen", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (antwort == MessageBoxResult.No)
-            Abschließen();
+            await AbschließenAsync();
     }
 
     /// <summary>Führt einen Scan-Durchgang aus; <paramref name="onSeite"/> läuft im UI-Thread.</summary>
-    private async Task ScanAusführen(ScanZustand z, Action<byte[]> onSeite)
+    private async Task ScanAusführen(ScanZustand z, Action<byte[], int> onSeite)
     {
         if (_scannerAktiv is null)
             return;
-        _scanntGerade = true;
-        Bedienbar(false);
-        ScanAnzeige.Visibility = Visibility.Visible;
+        Beschäftigt(true, "Scannt...");
         try
         {
-            await ScanDienst.ScannenAsync(_scannerAktiv.Id, z, png => Dispatcher.Invoke(() => onSeite(png)));
+            await ScanDienst.ScannenAsync(_scannerAktiv.Id, z, (bild, dpi) => Dispatcher.Invoke(() => onSeite(bild, dpi)));
         }
         catch (ScanFehler ex)
         {
@@ -183,20 +181,31 @@ public partial class ScanFenster : Wpf.Ui.Controls.FluentWindow
         }
         finally
         {
-            ScanAnzeige.Visibility = Visibility.Collapsed;
-            _scanntGerade = false;
-            Bedienbar(true);
+            Beschäftigt(false, "");
         }
     }
 
-    private void Abschließen()
+    /// <summary>Sperrt die Bedienung und zeigt den Fortschrittsring (Scan oder PDF-Erstellung).</summary>
+    private void Beschäftigt(bool an, string text)
     {
+        _scanntGerade = an;
+        ScanAnzeigeText.Text = text;
+        ScanAnzeige.Visibility = an ? Visibility.Visible : Visibility.Collapsed;
+        Bedienbar(!an);
+    }
+
+    private async Task AbschließenAsync()
+    {
+        Beschäftigt(true, "PDF wird erstellt...");
         try
         {
-            Ergebnis = ScanPdf.Erstellen(_seiten);
+            // Hintergrund-STA: viele Seiten dauern Sekunden, die Oberfläche bleibt bedienbar.
+            var seiten = _seiten.ToList();
+            Ergebnis = await ScanDienst.AufStaAsync(() => ScanPdf.Erstellen(seiten));
         }
         catch (Exception ex)
         {
+            Beschäftigt(false, "");
             MessageBox.Show(this, "Das PDF konnte nicht erstellt werden:\n" + ex.Message, "Scannen",
                             MessageBoxButton.OK, MessageBoxImage.Error);
             return;

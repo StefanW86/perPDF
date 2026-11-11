@@ -132,7 +132,7 @@
                         <StackPanel x:Name="ScanAnzeige" Visibility="Collapsed"
                                     HorizontalAlignment="Center" VerticalAlignment="Center">
                             <ui:ProgressRing IsIndeterminate="True" />
-                            <TextBlock Text="Scannt..." Foreground="Black" Margin="0,8,0,0"
+                            <TextBlock x:Name="ScanAnzeigeText" Text="Scannt..." Foreground="Black" Margin="0,8,0,0"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
                     </Grid>

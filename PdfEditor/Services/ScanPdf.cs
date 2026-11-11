@@ -64,6 +64,18 @@ public static class ScanPdf
 
         byte[] sw = Erstellen([(TestPng(2480, 3508), ScanFarbe.Schwarzweiß, 300)]);
         Prüfen(sw.Length < 600_000, $"Größe Schwarzweiß ({sw.Length} B)");
+
+        // Bildinhalt überlebt die Graustufen-Umwandlung (erster Balken beginnt bei 150/200).
+        using (var quelle = SKBitmap.Decode(png))
+        using (var grau = Grau(quelle))
+        {
+            Prüfen(grau.GetPixel(160, 210).Red < 64, "Graustufen: Balken ist dunkel");
+            Prüfen(grau.GetPixel(100, 100).Red > 192, "Graustufen: Rand ist hell");
+        }
+
+        // Erstellen läuft auch abseits des UI-Threads (Dialog erstellt das PDF im Hintergrund).
+        byte[] hinten = ScanDienst.AufStaAsync(() => Erstellen([(png, ScanFarbe.Farbe, 300)])).GetAwaiter().GetResult();
+        Prüfen(hinten.Length > 0, "Erstellen im Hintergrund");
     }
 
     private static void Prüfen(bool ok, string was)
