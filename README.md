@@ -17,6 +17,17 @@ durchgehend auf Deutsch. Das Erscheinungsbild orientiert sich am grünen
 - **PDFs zusammenführen** und **Seiten als neues PDF extrahieren**
 - **Drucken** (**Strg+P**) – vektoriell, mit allen Anmerkungen
 
+**Scannen**
+- **Direkt aus perPDF scannen** – über WIA, auch mit Netzwerkscannern
+- Vorlagenglas oder **Einzug**, Papierformat, **Farbe / Graustufen /
+  Schwarzweiß**, Auflösung (DPI), Helligkeit und Kontrast
+- **Vorschau** (Vorlagenglas) und **mehrseitige Scans**: nach jedem Durchgang
+  „Weitere scannen“ oder „Fertig“
+- Scan **an das geöffnete Dokument anhängen** oder als **neues Dokument**
+  öffnen – neue Scans werden automatisch als PDF im Scan-Ordner gespeichert
+  (Standard: `Dokumente\Scans\SCAN_{Datum}_{Zeit}.pdf`, unter *Optionen*
+  anpassbar)
+
 **Anmerken**
 - **Text einfügen** mit Schriftgröße, Fett, Kursiv, Unterstrichen und Textfarbe
 - **Textmarker** und **Stift** als Freihand-Striche, **Radiergummi** zum Entfernen
@@ -37,7 +48,8 @@ durchgehend auf Deutsch. Das Erscheinungsbild orientiert sich am grünen
 - **Vorhandene Felder bearbeiten**: verschieben, Eigenschaften ändern oder löschen
 
 **Sonstiges**
-- **Vorhandenen PDF-Text markieren & kopieren** (**Strg+C**) – ohne eigenen Modus
+- **Vorhandenen PDF-Text markieren & kopieren** (**Strg+C**) – ohne eigenen Modus,
+  **Doppelklick markiert ein Wort**
 - **Helles und dunkles Design**
 - Kostenlos, ohne Konto, ohne Werbung
 
@@ -47,6 +59,7 @@ durchgehend auf Deutsch. Das Erscheinungsbild orientiert sich am grünen
 - Modernes Fluent-Design über **WPF-UI**
 - PDF-Anzeige über **PDFtoImage** (PDFium), Bearbeitung über **PDFsharp**
 - Textextraktion (für die Textauswahl) über **PdfPig**
+- Scannen über **WIA 2.0** (Windows Image Acquisition, in Windows enthalten)
 - Drag-and-drop über **gong-wpf-dragdrop**
 
 ## Voraussetzungen

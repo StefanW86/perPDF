@@ -1,0 +1,53 @@
+=== Beschreibung (Partner Center → Store-Einträge → Deutsch → Beschreibung) ===
+
+perPDF ist ein schlanker, kostenloser PDF-Editor für Windows – ohne Konto, ohne Werbung, komplett auf Deutsch.
+
+Öffnen Sie mehrere PDFs in Tabs, füllen Sie Formulare aus, unterschreiben Sie Dokumente, scannen Sie Papier direkt als PDF ein und ordnen Sie Seiten per Drag-and-drop neu.
+
+SCANNEN
+• Direkt aus perPDF scannen – auch mit Netzwerkscannern
+• Vorlagenglas oder Einzug, Farbe, Graustufen oder Schwarzweiß, Auflösung, Helligkeit und Kontrast
+• Vorschau und mehrseitige Scans in einem Durchgang
+• Scan an das geöffnete Dokument anhängen oder als neues PDF automatisch im Scan-Ordner speichern
+
+DOKUMENTE & SEITEN
+• Mehrere PDFs in Tabs, Miniaturansicht, Inhaltsverzeichnis und Volltextsuche
+• Seiten hinzufügen, importieren, löschen, drehen und per Drag-and-drop umsortieren
+• PDFs zusammenführen und Seiten als neues PDF extrahieren
+• Vektorielles Drucken mit allen Anmerkungen
+
+ANMERKEN
+• Text einfügen mit Schriftart, Größe, Fett, Kursiv, Unterstrichen und Farbe
+• Textmarker, Stift und Radiergummi
+• Symbole wie Häkchen, Kreuz und Durchstreichung
+• Bilder aus Datei oder Zwischenablage einfügen, drehen und zuschneiden
+• Unterschriften als Bild mit automatisch transparentem Hintergrund
+• Kommentare zu markiertem Text, mit Antworten und Status
+
+FORMULARE
+• Formulare direkt auf der Seite ausfüllen
+• Formular-Designer: Textfelder, Kontrollkästchen, Optionsfelder, Dropdowns, Listen-, Datums-, Zahlen- und Unterschriftsfelder
+• Vorhandene Felder verschieben, bearbeiten oder löschen
+
+AUSSERDEM
+• Vorhandenen PDF-Text markieren und kopieren, Doppelklick markiert ein Wort
+• Helles und dunkles Design im modernen Windows-Look
+
+
+=== Neuerungen in dieser Version (Partner Center → „Was ist neu in dieser Version?“) ===
+
+• Neu: Scannen direkt in perPDF – Vorlagenglas oder Einzug, mehrseitig, mit Vorschau; Scans werden an das geöffnete Dokument angehängt oder automatisch als PDF im Scan-Ordner gespeichert
+• Neu: Optionen für Scan-Ordner und Dateiname
+• Meldungen und Nachfragen im perPDF-Design mit eindeutigen Schaltflächen
+• Doppelklick markiert ein Wort im PDF-Text
+• Inhaltsverzeichnis im dunklen Design wieder gut lesbar
+
+
+=== Kurzbeschreibung / Funktionsliste (Partner Center → „Produktfunktionen“, je max. 200 Zeichen) ===
+
+PDFs in Tabs öffnen, durchsuchen und drucken
+Direkt aus perPDF scannen – mehrseitig, auch mit Netzwerkscannern
+Formulare ausfüllen und eigene Formularfelder erstellen
+Text, Bilder, Unterschriften, Textmarker und Kommentare einfügen
+Seiten hinzufügen, löschen, drehen, umsortieren, zusammenführen und extrahieren
+Helles und dunkles Design, kostenlos, ohne Konto und ohne Werbung
