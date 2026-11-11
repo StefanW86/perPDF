@@ -1,0 +1,153 @@
+<ui:FluentWindow x:Class="PdfEditor.Windows.ScanFenster"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="Neuer Scan"
+                 Width="820" Height="600"
+                 MinWidth="700" MinHeight="520"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round"
+                 ResizeMode="CanResize"
+                 Loaded="Fenster_Loaded"
+                 Closing="Fenster_Closing">
+
+    <Window.Resources>
+        <Style x:Key="Beschriftung" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+        <Style x:Key="Zeile" TargetType="Grid">
+            <Setter Property="Margin" Value="0,4" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="Neuer Scan" ShowMinimize="False" ShowMaximize="False" />
+
+        <Grid Grid.Row="1" Margin="16,8,16,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ===== Einstellungen ===== -->
+            <StackPanel x:Name="EinstellungenBereich" Grid.Column="0">
+                <Grid Style="{StaticResource Zeile}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="ScannerText" Text="Scanner: wird gesucht..."
+                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <ui:Button x:Name="ScannerÄndernKnopf" Grid.Column="1" Content="Ändern..."
+                               Margin="8,0,0,0" Click="ScannerÄndern_Click" />
+                </Grid>
+
+                <Separator Margin="0,8" />
+
+                <Grid Style="{StaticResource Zeile}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Quelle:" Style="{StaticResource Beschriftung}" />
+                    <ComboBox x:Name="QuelleAuswahl" Grid.Column="1" DisplayMemberPath="Text"
+                              SelectionChanged="Quelle_SelectionChanged" />
+                </Grid>
+                <Grid Style="{StaticResource Zeile}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Papierformat:" Style="{StaticResource Beschriftung}" />
+                    <ComboBox x:Name="PapierAuswahl" Grid.Column="1" DisplayMemberPath="Text" />
+                </Grid>
+
+                <Separator Margin="0,8" />
+
+                <Grid Style="{StaticResource Zeile}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Farbmodus:" Style="{StaticResource Beschriftung}" />
+                    <ComboBox x:Name="FarbeAuswahl" Grid.Column="1" DisplayMemberPath="Text" />
+                </Grid>
+                <Grid Style="{StaticResource Zeile}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Auflösung (DPI):" Style="{StaticResource Beschriftung}" />
+                    <ComboBox x:Name="DpiAuswahl" Grid.Column="1" />
+                </Grid>
+
+                <Separator Margin="0,8" />
+
+                <Grid Style="{StaticResource Zeile}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="56" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Helligkeit:" Style="{StaticResource Beschriftung}" />
+                    <Slider x:Name="HelligkeitRegler" Grid.Column="1" Minimum="-100" Maximum="100"
+                            IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="2" Margin="8,0,0,0" TextAlignment="Right"
+                             Text="{Binding Value, ElementName=HelligkeitRegler, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+                <Grid Style="{StaticResource Zeile}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="56" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Kontrast:" Style="{StaticResource Beschriftung}" />
+                    <Slider x:Name="KontrastRegler" Grid.Column="1" Minimum="-100" Maximum="100"
+                            IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="2" Margin="8,0,0,0" TextAlignment="Right"
+                             Text="{Binding Value, ElementName=KontrastRegler, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+            </StackPanel>
+
+            <!-- ===== Vorschau ===== -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Border BorderThickness="1" Background="White"
+                        BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+                    <Grid>
+                        <Image x:Name="VorschauBild" Stretch="Uniform" Margin="4" />
+                        <StackPanel x:Name="ScanAnzeige" Visibility="Collapsed"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <ui:ProgressRing IsIndeterminate="True" />
+                            <TextBlock Text="Scannt..." Foreground="Black" Margin="0,8,0,0"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <TextBlock x:Name="SeitenText" Grid.Row="1" Margin="0,6,0,0" Text="Noch keine Seiten gescannt." />
+            </Grid>
+        </Grid>
+
+        <!-- ===== Schaltflächen ===== -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="16,0,16,16">
+            <ui:Button x:Name="VorschauKnopf" Content="Vorschau" MinWidth="100" Margin="0,0,8,0"
+                       Click="Vorschau_Click" ToolTipService.ShowOnDisabled="True" />
+            <ui:Button x:Name="ScannenKnopf" Content="Scannen" Appearance="Primary" MinWidth="100"
+                       Margin="0,0,8,0" Click="Scannen_Click" />
+            <ui:Button x:Name="AbbrechenKnopf" Content="Abbrechen" MinWidth="100" Click="Abbrechen_Click" />
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>
