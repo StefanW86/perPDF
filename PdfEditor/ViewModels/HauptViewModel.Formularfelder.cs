@@ -244,7 +244,7 @@ public partial class HauptViewModel
         var knöpfe = feld.Optionsschaltflächen
             .Select(o => (o.X1, o.Y1, o.X2, o.Y2)).ToList();
         var info = _seitenInfos[feld.SeitenIndex];
-        var beschriftungen = _textDienst.Beschriftungen(Bytes, feld.SeitenIndex, info.X1, info.Y1, knöpfe);
+        var beschriftungen = _textDienst.Beschriftungen(Bytes, feld.SeitenIndex, info, knöpfe);
 
         const double rand = 1.5; // leicht erweitern, damit das Original sicher überdeckt wird
         var bereiche = new List<(double X1, double Y1, double X2, double Y2)>();
@@ -402,7 +402,7 @@ public partial class HauptViewModel
             var info = _seitenInfos[feld.SeitenIndex];
             var knöpfe = feld.Optionsschaltflächen
                 .Select(o => (o.X1, o.Y1, o.X2, o.Y2)).ToList();
-            foreach (var b in _textDienst.Beschriftungen(Bytes, feld.SeitenIndex, info.X1, info.Y1, knöpfe))
+            foreach (var b in _textDienst.Beschriftungen(Bytes, feld.SeitenIndex, info, knöpfe))
             {
                 if (b is null)
                     continue;

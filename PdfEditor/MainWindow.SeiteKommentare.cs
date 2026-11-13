@@ -145,10 +145,7 @@ public partial class MainWindow
 
         if (!_textCache.TryGetValue(index, out var zeilen))
         {
-            // PdfPig normalisiert auf den MediaBox-Ursprung – diesen wieder
-            // aufaddieren, damit der Text zur restlichen Geometrie (PdfSharp) passt.
-            var info = _vm.SeitenInfos[index];
-            zeilen = _textDienst.ZeilenLesen(_vm.Bytes, index, info.X1, info.Y1);
+            zeilen = _textDienst.ZeilenLesen(_vm.Bytes, index, _vm.SeitenInfos[index]);
             _textCache[index] = zeilen;
         }
 

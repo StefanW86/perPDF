@@ -36,8 +36,9 @@ public static class Schriftarten
             using var doc = PdfDocument.Open(pdf);
             if (seitenIndex < 0 || seitenIndex >= doc.NumberOfPages)
                 return null;
-            // PdfPig rechnet ab MediaBox-Ursprung (vgl. PdfTextDienst.ZeilenLesen).
-            double px = x - info.X1, py = y - info.Y1;
+            // PdfPig rechnet in Anzeige-Punkten (vgl. PdfTextDienst.NachPdf).
+            var p = PdfTextDienst.NachPdfPig(info, x, y);
+            double px = p.X, py = p.Y;
 
             var wort = doc.GetPage(seitenIndex + 1)
                 .GetWords(NearestNeighbourWordExtractor.Instance)
