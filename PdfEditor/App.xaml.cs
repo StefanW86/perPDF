@@ -91,6 +91,7 @@ public partial class App : Application
         if (e.Args.Contains("--selbsttest"))
         {
             Services.ScanPdf.Selbsttest(); // wirft bei Fehlschlag → Exitcode ≠ 0
+            Services.OcrSelbsttest.Ausführen();
             Shutdown(0);
             return;
         }

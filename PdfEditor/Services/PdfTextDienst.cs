@@ -104,6 +104,26 @@ public class PdfTextDienst
     }
 
     /// <summary>
+    /// Anzahl sichtbarer Zeichen echten Texts je Seite (für die Texterkennung: Seiten mit Text
+    /// überspringen). Bei nicht lesbarem Dokument 0 für alle Seiten.
+    /// </summary>
+    public int[] ZeichenJeSeite(byte[] pdf, int seitenAnzahl)
+    {
+        var ergebnis = new int[seitenAnzahl];
+        try
+        {
+            using var doc = PdfDocument.Open(pdf);
+            for (int i = 0; i < Math.Min(seitenAnzahl, doc.NumberOfPages); i++)
+                ergebnis[i] = doc.GetPage(i + 1).Letters.Count(l => !string.IsNullOrWhiteSpace(l.Value));
+        }
+        catch
+        {
+            // Nicht lesbar → alle Seiten gelten als ohne Text.
+        }
+        return ergebnis;
+    }
+
+    /// <summary>
     /// Liest für jede übergebene Schaltfläche (Widget-Rechteck in absoluten PDF-Punkten) die
     /// danebenstehende Beschriftung aus dem Seiteninhalt: die Wörter rechts der Schaltfläche
     /// auf derselben Zeile, bis eine große horizontale Lücke kommt. Damit lassen sich die

@@ -27,6 +27,10 @@ durchgehend auf Deutsch. Das Erscheinungsbild orientiert sich am grünen
   öffnen – neue Scans werden automatisch als PDF im Scan-Ordner gespeichert
   (Standard: `Dokumente\Scans\SCAN_{Datum}_{Zeit}.pdf`, unter *Optionen*
   anpassbar)
+- **Texterkennung (OCR)** auf Knopfdruck – erkennt den Text gescannter Seiten
+  mit der in Windows integrierten Texterkennung und hinterlegt ihn unsichtbar,
+  sodass er markiert, kopiert und durchsucht werden kann (Seiten mit
+  vorhandenem Text werden übersprungen)
 
 **Anmerken**
 - **Text einfügen** mit Schriftgröße, Fett, Kursiv, Unterstrichen und Textfarbe
@@ -55,7 +59,7 @@ durchgehend auf Deutsch. Das Erscheinungsbild orientiert sich am grünen
 
 ## Technik
 
-- **C# / WPF** auf **.NET 8** (`net8.0-windows`, `win-x64`)
+- **C# / WPF** auf **.NET 8** (`net8.0-windows10.0.19041.0`, `win-x64`)
 - Modernes Fluent-Design über **WPF-UI**
 - PDF-Anzeige über **PDFtoImage** (PDFium), Bearbeitung über **PDFsharp**
 - Textextraktion (für die Textauswahl) über **PdfPig**
@@ -75,7 +79,7 @@ dotnet run --project PdfEditor -c Release
 ```
 
 Die fertige Anwendung liegt anschließend unter
-`PdfEditor\bin\Release\net8.0-windows\win-x64\perPDF.exe`.
+`PdfEditor\bin\Release\net8.0-windows10.0.19041.0\win-x64\perPDF.exe`.
 
 Die Versionsnummer stammt ausschließlich aus dem Git-Tag `vX.Y.Z` – ohne
 erreichbaren Tag schlägt der Build fehl.

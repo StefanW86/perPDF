@@ -3,7 +3,8 @@
   <!-- WPF-Desktopanwendung für .NET 8, nur für Windows x64 -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <!-- 10.0.19041: Zugriff auf die in Windows integrierte Texterkennung (Windows.Media.Ocr); entspricht der MSIX-Mindestversion -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <RootNamespace>PdfEditor</RootNamespace>
     <AssemblyName>perPDF</AssemblyName>

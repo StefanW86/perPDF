@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using Microsoft.Win32;
@@ -258,6 +258,7 @@ public partial class HauptViewModel
         ZoomMinusBefehl.AusführbarkeitAktualisieren();
         TextEinfügenBefehl.AusführbarkeitAktualisieren();
         BildEinfügenBefehl.AusführbarkeitAktualisieren();
+        TexterkennungBefehl.AusführbarkeitAktualisieren();
     }
 
     private void Fehler(string nachricht, Exception ex)

@@ -96,7 +96,10 @@ public partial class MainWindow
         LadeText.Text = text;
         LadeDetails.Text = "";
         LadeBalken.IsIndeterminate = sichtbar;
+        LadeAbbrechen.Visibility = sichtbar && _vm.TexterkennungLäuft ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void LadeAbbrechen_Click(object sender, RoutedEventArgs e) => _vm.TexterkennungAbbrechen();
 
     private void TabSeiteGerendert(int aktuelle, int gesamt)
     {
